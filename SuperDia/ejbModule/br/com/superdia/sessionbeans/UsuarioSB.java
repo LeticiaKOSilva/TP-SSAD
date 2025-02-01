@@ -1,4 +1,4 @@
-package br.com.superdia.sessionbean;
+package br.com.superdia.sessionbeans;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import jakarta.persistence.TypedQuery;
 @Stateful
 @Remote(IUsuario.class)
 public class UsuarioSB implements IUsuario {
-	@PersistenceContext
+	@PersistenceContext(unitName = "SuperDia")
 	private EntityManager em;
 	
 	@Override

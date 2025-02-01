@@ -12,8 +12,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 
 @Stateful
 @Remote(IPessoa.class)
-public class PessoaBean implements IPessoa{
-	
+public class PessoaSB implements IPessoa {
+
 	@PersistenceContext(unitName = "SuperDia")
 	EntityManager em;
 
