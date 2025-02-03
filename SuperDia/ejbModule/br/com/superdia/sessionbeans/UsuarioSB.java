@@ -27,7 +27,7 @@ public class UsuarioSB implements IUsuario {
 	}
 
 	@Override
-	public void remove(Usuario usuario) {
+	public void delete(Usuario usuario) {
 		em.remove(em.merge(usuario));
 	}
 
@@ -38,14 +38,17 @@ public class UsuarioSB implements IUsuario {
 	}
 	
 	@Override
-	public Usuario autentication(Usuario usuario) {
-		TypedQuery<Usuario>query = em.createQuery("SELECT u FROM Usuario u WHERE u.perfil=:perfil AND u.senha=:usuario", Usuario.class);
-		query.setParameter("perfil", usuario.getPerfil());
-		query.setParameter("senha",usuario.getSenha());
-		List<Usuario>resuList = query.getResultList();
-		
-		if(resuList.isEmpty())
-			return null;
-		return resuList.get(0);
+	public Usuario authentication(String email, String senha) {
+	    TypedQuery<Usuario> query = em.createQuery(
+	        "SELECT u FROM Usuario u WHERE u.pessoa.email = :email AND u.senha = :senha", 
+	        Usuario.class
+	    );
+	    query.setParameter("email", email);
+	    query.setParameter("senha", senha);
+	    
+	    List<Usuario> resultList = query.getResultList();
+	    
+	    return resultList.isEmpty() ? null : resultList.get(0);
 	}
+
 }

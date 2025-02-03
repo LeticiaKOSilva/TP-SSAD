@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 
 import br.com.superdia.interfaces.IPessoa;
+import br.com.superdia.interfaces.IUsuario;
 import br.com.superdia.modelo.Pessoa;
+import br.com.superdia.modelo.Usuario;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.Consumes;
@@ -27,8 +29,12 @@ public class PessoaResource implements Serializable {
 	@EJB
     private IPessoa pessoaService;
 	
+	@EJB
+	private IUsuario usuarioService;
+	
 	public String getPerfil(String login,String senha) {
-		if(login.equals("admin") && senha.equals("123456")) return "admin";
+		Usuario usuario = usuarioService.authentication(login, senha);
+		if (usuario != null) return usuario.getPerfil();
 		return "";
 	}
 	

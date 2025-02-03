@@ -7,7 +7,7 @@ import br.com.superdia.modelo.Usuario;
 public interface IUsuario {
 	public void create(Usuario usuario);
 	public void update(Usuario usuario);
-	public void remove(Usuario usuario);
-	public Usuario autentication(Usuario usuario);
+	public void delete(Usuario usuario);
+	public Usuario authentication(String email,String senha);
 	public List<Usuario>getUsuarios();
 }

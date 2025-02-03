@@ -1,52 +1,53 @@
 package br.com.superdia.api;
 
-import br.com.superdia.interfaces.IProduto;
-import br.com.superdia.interfaces.IUsuario;
-import br.com.superdia.modelo.Produto;
-import br.com.superdia.modelo.Usuario;
-import jakarta.ejb.EJB;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import java.io.Serializable;
 import java.util.List;
 
-@Path("/produto")
+import br.com.superdia.interfaces.IUsuario;
+import br.com.superdia.modelo.Usuario;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+@Path("/usuario")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @RequestScoped  // Garantir que o CDI gerencie o escopo
-public class ProdutoResource implements Serializable {
+public class UsuarioResource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private final String PERFIL_ADMIN= "admin";
 	
 	@EJB
-    private IProduto produtoService;
-	
-	@EJB
-	private IUsuario usuarioService;
+    private IUsuario usuarioService;
 	
 	public String getPerfil(String login,String senha) {
 		Usuario usuario = usuarioService.authentication(login, senha);
 		if (usuario != null) return usuario.getPerfil();
 		return "";
 	}
-
+	
     @POST
     @Path("/create")
     public Response create(AuthRequest authRequest) {
         try {
         	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
-        	Produto produto = authRequest.getProduto();
         	
-            produtoService.create(produto);
-            return Response.status(Response.Status.CREATED).entity(produto).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao criar produto").build();
-        }
+        	Usuario usuario = authRequest.getUsuario();
+        	usuarioService.create(usuario);
+        	return Response.status(Response.Status.CREATED).entity(usuario).build();
+        	
+        }catch (Exception e) {
+        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar usuario").build();
+		}
+       
     }
 
     @PUT
@@ -55,12 +56,11 @@ public class ProdutoResource implements Serializable {
         try {
         	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
-        	Produto produto = authRequest.getProduto();
-        	
-            produtoService.update(produto);
-            return Response.ok(produto).build();
+        	Usuario usuario = authRequest.getUsuario();
+            usuarioService.update(usuario);
+            return Response.ok(usuario).build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar produto").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar usuario").build();
         }
     }
 
@@ -70,33 +70,33 @@ public class ProdutoResource implements Serializable {
         try {
         	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
-        	Produto produto = authRequest.getProduto();
         	
-            produtoService.delete(produto);
-            return Response.ok().entity("Produto removido com sucesso!").build();
+            Usuario usuario = authRequest.getUsuario();
+            usuarioService.delete(usuario);
+            return Response.ok().entity("Usuario removido com sucesso!").build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao remover produto").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao remover usuario").build();
         }
     }
 
     @POST
-    @Path("/getProdutos")
-    public Response getProdutos(AuthRequest authRequest) {
+    @Path("/getPessoas")
+    public Response getPessoas(AuthRequest authRequest) {
         try {
         	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	
-            List<Produto> produtos = produtoService.getProdutos();
-            return Response.ok(produtos).build();
+            List<Usuario> usuarios = usuarioService.getUsuarios();
+            return Response.ok(usuarios).build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar produtos").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar usuarios").build();
         }
     }
 
     public static class AuthRequest {
         private String login;
         private String senha;
-        private Produto produto;
+        private Usuario usuario;
 
         public String getLogin() { return login; }
         public void setLogin(String login) { this.login = login; }
@@ -104,7 +104,7 @@ public class ProdutoResource implements Serializable {
         public String getSenha() { return senha; }
         public void setSenha(String senha) { this.senha = senha; }
 
-        public Produto getProduto() { return produto; }
-        public void setProduto(Produto produto) { this.produto = produto; }
+        public Usuario getUsuario() { return usuario; }
+        public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     }
 }
