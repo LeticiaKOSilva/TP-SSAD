@@ -49,7 +49,7 @@ public class ProdutoResource implements Serializable {
     public Response delete(@PathParam("id") Long id) {
         try {
             Produto produto = new Produto();
-            produto.setId(id); // Supondo que Produto tenha um campo "id"
+            produto.setId(id);
             produtoService.delete(produto);
             return Response.ok().entity("Produto removido com sucesso!").build();
         } catch (Exception e) {
@@ -68,7 +68,6 @@ public class ProdutoResource implements Serializable {
         }
     }
 
-    // Se precisar da classe AuthRequest, mova para um arquivo separado
     public static class AuthRequest {
         private String login;
         private String senha;
