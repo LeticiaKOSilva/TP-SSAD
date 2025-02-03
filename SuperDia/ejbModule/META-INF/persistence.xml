@@ -6,7 +6,7 @@
 		<class>br.com.superdia.modelo.Pessoa</class>
 		<class>br.com.superdia.modelo.Usuario</class>
 		<properties>
-			<property name="jakarta.persistence.schema-generation.database.action" value="create"/>
+			<property name="jakarta.persistence.schema-generation.database.action" value="update"/>
 		</properties>
 	</persistence-unit>
 </persistence>
