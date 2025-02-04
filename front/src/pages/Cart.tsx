@@ -29,7 +29,54 @@ export default function Cart() {
         <p className="text-gray-500">Seu carrinho está vazio.</p>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="md:hidden space-y-4">
+            {items.map(item => (
+              <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="h-16 w-16 object-cover rounded"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        R$ {item.price.toFixed(2)} × {item.quantity}
+                      </div>
+                      <div className="text-sm font-medium text-gray-900 mt-1">
+                        R$ {(item.price * item.quantity).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="p-1 rounded-md hover:bg-gray-100"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="text-sm text-gray-900">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="p-1 rounded-md hover:bg-gray-100"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block bg-white rounded-lg shadow-sm overflow-y-auto sm:overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
