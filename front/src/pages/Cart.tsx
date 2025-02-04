@@ -3,11 +3,13 @@ import LoginModal from '../components/LoginModal';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import useCart from '../context/useCartContext';
 import useAuth from '../context/useAuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Cart() {
   const { items, removeFromCart, updateQuantity } = useCart();
   const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const navigate = useNavigate();
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -15,7 +17,7 @@ export default function Cart() {
     if (!user) {
       setShowLoginModal(true);
     } else {
-      console.log('Checkout:', items);
+      navigate('/checkout');
     }
   };
 
