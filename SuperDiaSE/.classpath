@@ -15,11 +15,11 @@
 	<classpathentry kind="lib" path="C:/Users/Yury/Documents/GitHub/TP-SSAD/DesktopDependencies/hibernate-core-6.4.4.Final.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Yury/Documents/GitHub/TP-SSAD/DesktopDependencies/jboss-cli-client.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Yury/Documents/GitHub/TP-SSAD/DesktopDependencies/jboss-client.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Yury/Documents/GitHub/TP-SSAD/DesktopDependencies/SuperDIAClient.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/SuperDiaClient"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
