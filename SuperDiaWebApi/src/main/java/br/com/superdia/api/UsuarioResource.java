@@ -47,7 +47,6 @@ public class UsuarioResource implements Serializable {
         }catch (Exception e) {
         	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar usuario").build();
 		}
-       
     }
 
     @PUT
@@ -90,6 +89,23 @@ public class UsuarioResource implements Serializable {
             return Response.ok(usuarios).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar usuarios").build();
+        }
+    }
+    
+    @POST
+    @Path("/authenticate")
+    public Response authenticate(AuthRequest authRequest) {
+        try {
+            Usuario usuario = usuarioService.authentication(authRequest.getLogin(), authRequest.getSenha());
+
+            if (usuario != null) {
+                return Response.ok(usuario).build();
+            } else {
+                return Response.status(Response.Status.FORBIDDEN).entity("Credenciais inválidas!").build();
+            }
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro na autenticação").build();
         }
     }
 
