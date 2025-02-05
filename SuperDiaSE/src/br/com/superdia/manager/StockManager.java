@@ -9,9 +9,13 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import br.com.superdia.modelo.Produto;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class StockManager {
     private static final String BASE_URL = "http://localhost:8080/SuperDiaWebApi/rest/";
+    private static final String RED_BULL_API = "https://www.redbullshopus.com/products.json";
+    private static final String KYLIE_COSMETICS_API = "https://www.kyliecosmetics.com/products.json";
     private static String email, password;
 
     public static void main(String[] args) {
@@ -36,6 +40,7 @@ public class StockManager {
                     case 2 -> updateProduct(scanner);
                     case 3 -> removeProduct(scanner);
                     case 4 -> listProduct();
+                    case 5 -> registerPartnerProducts();
                     case 0 -> System.out.println("Saindo...");
                     default -> System.err.println("Opção inválida!");
                 }
@@ -96,6 +101,65 @@ public class StockManager {
         client.close();
     }
 
+    private static void registerPartnerProducts() {
+        System.out.println("\n=== REGISTRAR PRODUTOS DE LOJAS PARCEIRAS ===");
+        System.out.println("1. Red Bull Shop");
+        System.out.println("2. Kylie Cosmetics");
+        System.out.print("Escolha uma opção: ");
+
+        Scanner scanner = new Scanner(System.in);
+        int option = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (option) {
+            case 1 -> fetchAndRegisterProducts(RED_BULL_API);
+            case 2 -> fetchAndRegisterProducts(KYLIE_COSMETICS_API);
+            default -> System.err.println("Opção inválida!");
+        }
+    }
+
+    private static void fetchAndRegisterProducts(String apiUrl) {
+        Client client = ClientBuilder.newClient();
+        Response response = client.target(apiUrl)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+            String jsonResponse = response.readEntity(String.class);
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode rootNode = mapper.readTree(jsonResponse);
+
+                if (apiUrl.equals(RED_BULL_API)) {
+                    // Parse Red Bull Shop products
+                    for (JsonNode productNode : rootNode.path("products")) {
+                        String nome = productNode.path("title").asText();
+                        String descricao = productNode.path("handle").asText();
+                        double preco = productNode.path("variants").get(0).path("price").asDouble();
+                        Produto produto = new Produto(nome, descricao, preco, 10, 100); // Default values for estoqueMinimo and quantidadeEstoque
+                        sendPostRequest("produto/create", produto, "Produto cadastrado com sucesso: " + nome);
+                    }
+                } else if (apiUrl.equals(KYLIE_COSMETICS_API)) {
+                    // Parse Kylie Cosmetics products
+                    for (JsonNode productNode : rootNode.path("products")) {
+                        String nome = productNode.path("title").asText();
+                        String descricao = productNode.path("handle").asText();
+                        double preco = productNode.path("variants").get(0).path("price").asDouble();
+                        Produto produto = new Produto(nome, descricao, preco, 10, 100); // Default values for estoqueMinimo and quantidadeEstoque
+                        sendPostRequest("produto/create", produto, "Produto cadastrado com sucesso: " + nome);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao processar produtos: " + e.getMessage());
+            }
+        } else {
+            System.err.println("Erro ao buscar produtos da API: " + response.readEntity(String.class));
+        }
+
+        response.close();
+        client.close();
+    }
+
     private static boolean obtainCredentials(Scanner scanner) {
         email = readString("Digite seu email de usuário: ", scanner);
         password = readString("Digite sua senha: ", scanner);
@@ -108,6 +172,7 @@ public class StockManager {
         System.out.println("2. Atualizar Produto");
         System.out.println("3. Remover Produto");
         System.out.println("4. Listar Produtos");
+        System.out.println("5. Registrar Produtos de Lojas Parceiras");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -171,7 +236,6 @@ public class StockManager {
         System.out.println("JSON Enviado: " + json);
         return json;
     }
-
 
     private static String readString(String message, Scanner scanner) {
         System.out.print(message);
