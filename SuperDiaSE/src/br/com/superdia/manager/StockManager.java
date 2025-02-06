@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import br.com.superdia.modelo.Produto;
+import br.com.superdia.soap.CreditCardValidatorService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,6 +42,7 @@ public class StockManager {
                     case 3 -> removeProduct(scanner);
                     case 4 -> listProduct();
                     case 5 -> registerPartnerProducts();
+                    case 6 -> validateCreditCard(scanner);
                     case 0 -> System.out.println("Saindo...");
                     default -> System.err.println("Opção inválida!");
                 }
@@ -160,6 +162,26 @@ public class StockManager {
         client.close();
     }
 
+    private static void validateCreditCard(Scanner scanner) {
+        System.out.println("\n=== VALIDAR CARTÃO DE CRÉDITO ===");
+        String cardNumber = readString("Número do Cartão: ", scanner);
+        String expiryDate = readString("Data de Validade (MM/YY): ", scanner);
+
+        cardNumber = cardNumber.replaceAll("\\s+", "").trim();
+
+        expiryDate = expiryDate.replace("/", "").trim();
+
+        CreditCardValidatorService validator = new CreditCardValidatorService();
+        boolean isValid = validator.validateCard(cardNumber, expiryDate);
+
+        if (isValid) {
+            System.out.println("Cartão de crédito válido.");
+        } else {
+            System.err.println("Cartão de crédito inválido.");
+        }
+    }
+
+
     private static boolean obtainCredentials(Scanner scanner) {
         email = readString("Digite seu email de usuário: ", scanner);
         password = readString("Digite sua senha: ", scanner);
@@ -173,6 +195,7 @@ public class StockManager {
         System.out.println("3. Remover Produto");
         System.out.println("4. Listar Produtos");
         System.out.println("5. Registrar Produtos de Lojas Parceiras");
+        System.out.println("6. Validar Cartão de Crédito");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
