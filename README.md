@@ -22,12 +22,15 @@
 
  | | ÁREA | DESCRIÇÃO | |
    | --- | --- | --- | --- |
-   ||  |  ||
-   ||  |  ||
-   ||  |  ||
-   ||  | ||
-   ||  |  ||
-   ||  |  ||
+   || Projeto EJB SuperDia  | Implementação das 3 interfaces criadas no projeto SuperDiaClient no pacote br.com.superdia.sessionbean ||
+   || ProjetoEJB SuperDiaClient | - Implementação no pacote br.com.superdia.modelo as classes Produto, Pessoa e Usuário (Teremos 3 perfis: Administrador, Caixa e Cliente). <br><br> - Implementação no pacote br.com.superdia.interfaces as interfaces para a persistencia de dados das 3 classes criadas acima. ||
+   || Implementação JAX-RS |  Implementar o JAX-RS para realizar as operações CRUD nas 3 classes modelos ||
+   || Validar Autenticação | Validar a autenticação dos usuários e permitir que o: <br> <br> <strong>- Administrador:</strong> Gerencia o estoque.  <br> <strong>- Caixa:</strong> Efetue vendas. <br> <strong>- Cliente: </strong> Compre online. ||
+   || Aplicação Web | Responsável por permitir que os usuários  de perfil Administrador gerenciamento de estoque (cadatro ou importação de produtos). ||
+   || Aplicação Desktop | Responsável por permitir aos usuários de perfil Caixa a cadastrarem as compras efetuadas pelo cliente. ||
+   || Loja online | Responsável por permitir aos usuários de perfil Cliente adicionem produtos no seu carrinho de compras e finalizam a compra. ||
+   || Aplicação Mobile | Responsável por permitir aos usuários de perfil Cliente adicionem produtos no seu carrinho de compras e finalizam a compra. ||
+   
 
 ## Imagens referentes ao projeto
 
@@ -39,9 +42,14 @@
 
 
 ## Colaboradores do Projeto
-   - [Letícia Oliveira](https://github.com/LeticiaKOSilva)
-   - [Vinícius José](https://github.com/ViniciusJPSilva)
-   - [Vitor Samuel](https://github.com/VitorSVNascimento)
-   - [Vitor Silvestre](https://github.com/VitorST1)
-   - [Yury Oliveira](https://github.com/YuryOAraujo) 
+
+  - A seguir a tabela contém um link para o repositório de todos os colaboradores desse projeto.
+
+    || NOME | LINK DO  GITHUB ||
+      | --- | --- | --- | --- |
+      || Letícia Oliveira |[LeticiaKOSilva](https://github.com/LeticiaKOSilva) ||
+      || Vinícius José | [ViniciusJPSilva](https://github.com/ViniciusJPSilva) ||
+      || Vitor Samuel | [VitorSVNascimento](https://github.com/VitorSVNascimento) ||
+      || Vitor Silvestre | [VitorST1](https://github.com/VitorST1) ||
+      || Yury Oliveira | [YuryOAraujo](https://github.com/YuryOAraujo) ||
 
