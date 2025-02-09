@@ -1,11 +1,17 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../context/useAuthContext';
+import InputMask from 'react-input-mask';
 
 export default function Register() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [address, setAddress] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [phone, setPhone] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -18,16 +24,35 @@ export default function Register() {
       setError('As senhas não coincidem');
       return;
     }
+    const userData = {
+      usuario: {
+        senha: password,
+        perfil: "Administrador",
+        pessoa: {
+          nome: name,
+          endereco: address,
+          cpf: cpf,
+          email: email,
+          telefone: phone,
+          dataNascimento: new Date(birthDate.split('/').reverse().join('-')),
+        }
+      },
+    };
 
-    try {
-      // In a real app, you would call your registration API here
-      // For now, we'll just log in the user
-      await login(email, password);
-      navigate('/');
-    } catch (error) {
-      console.error('Registration failed:', error);
-      setError('Erro ao criar conta. Tente novamente.');
-    }
+    fetch('http://localhost:8080/SuperDiaWebApi/rest/usuario/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('User created:', data);
+      })
+      .catch((error) => {
+        console.error('Error creating user:', error);
+      });
   };
 
   return (
@@ -40,6 +65,18 @@ export default function Register() {
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Nome
+            </label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Email
@@ -66,13 +103,64 @@ export default function Register() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Confirmar Senha
+              Confirme a senha
             </label>
             <input
               type="password"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Endereço
+            </label>
+            <input
+              type="text"
+              required
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              CPF
+            </label>
+            <InputMask
+              mask="999.999.999-99"
+              value={cpf}
+              onChange={(e) => setCpf(e.target.value)}
+              maskChar={null}
+              required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Telefone
+            </label>
+            <InputMask
+              mask="(99) 99999-9999"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              maskChar={null}
+              required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+          <label className="block text-sm font-medium text-gray-700">
+              Data de Nascimento
+            </label>
+            <InputMask
+              mask="99/99/9999" // Mask for the date in DD/MM/YYYY format
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              maskChar={null}
+              required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -83,7 +171,7 @@ export default function Register() {
             Criar Conta
           </button>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
