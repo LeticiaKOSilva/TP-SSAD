@@ -15,14 +15,14 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center">
-            <ShoppingCart className="h-8 w-8 text-indigo-600" />
-            <span className="ml-2 text-xl font-bold text-gray-900">Supermercado Dia</span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+        <div className="flex md:grid md:grid-cols-3 items-center h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center">
+              <ShoppingCart className="h-8 w-8 text-indigo-600" />
+              <span className="ml-2 text-xl font-bold text-gray-900">Supermercado Dia</span>
+            </Link>
+          </div>
+          <nav className="hidden md:flex justify-center space-x-8">
             <Link to="/" className="text-gray-700 hover:text-indigo-600">
               Loja
             </Link>
@@ -35,8 +35,7 @@ export default function Header() {
               )}
             </Link>
           </nav>
-
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center justify-end space-x-4">
             {user ? (
               <div className="relative">
                 <button
@@ -46,8 +45,6 @@ export default function Header() {
                   <User className="h-6 w-6 text-gray-700" />
                   <span className="text-gray-700">{user.pessoa.nome}</span>
                 </button>
-
-                {/* Dropdown Menu */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg">
                     <div className="py-1">
@@ -81,10 +78,8 @@ export default function Header() {
               </>
             )}
           </div>
-
-          {/* Mobile menu button */}
           <button
-            className="md:hidden"
+            className="md:hidden ml-auto"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
@@ -95,8 +90,6 @@ export default function Header() {
           </button>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
