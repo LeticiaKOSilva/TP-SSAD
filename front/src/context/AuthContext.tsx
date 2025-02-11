@@ -6,17 +6,34 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (email: string, password: string) => {
+  const login = async (login: string, senha: string) => {
     try {
-      const mockUser = {
-        id: '1',
-        email,
-        password,
-        role: email.includes('admin') ? 'ADMIN' : 'CLIENT'
-      } as User;
-      setUser(mockUser);
+      try {
+        const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/usuario/authenticate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            login,
+            senha
+          }),
+        });
+    
+        if (!resp.ok) {
+          const errorMessage = await resp.text();
+          throw new Error(errorMessage);
+        }
+    
+        const data = await resp.json();
+        setUser(data);
+        return data;
+      } catch (error) {
+        console.error(error)
+        throw error
+      }
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error(error);
       throw error;
     }
   };

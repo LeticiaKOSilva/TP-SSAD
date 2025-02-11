@@ -13,36 +13,24 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    const authenticationData = {
-        "login": email,
-        "senha": password,
-    };
-
     try {
-      const response = await fetch('http://localhost:8080/SuperDiaWebApi/rest/usuario/authenticate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(authenticationData),
-      });
-  
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(errorMessage || 'Erro ao autenticar');
-      }
-  
-      const data = await response.json();
-      console.log('AUTENTICADO: ', data);
+      const user = await login(email, password);
 
-      if (data.perfil === 'admin') {
-        navigate('/pages/Admin/Dashboard'); // Redireciona se for admin
+      // Caso perfil seja admin, redirecionar para a página de admin, caso contrário, redirecionar para a página inicial
+      if (user.perfil === 'admin') {
+        return navigate('/admin');
       }
+
+      navigate('/');
     } catch (error) {
-      console.error('ERRO: ', error);
+      console.error(error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Ocorreu um erro');
+      }
     }
   };
-
   return (
     <div className="min-h-screen pt-24 pb-12 flex flex-col items-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">

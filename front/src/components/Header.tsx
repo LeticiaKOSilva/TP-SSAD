@@ -36,7 +36,7 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <Link
-                to={user.role === 'ADMIN' ? '/admin' : '/profile'}
+                to={user.perfil === 'admin' ? '/admin' : '/profile'}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 <User className="h-4 w-4 mr-2" />

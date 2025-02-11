@@ -11,15 +11,27 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
-export interface User {
-  id: string;
+export interface Person {
+  id?: string;
+  nome: string;
   email: string;
-  role: 'ADMIN' | 'CLIENT';
+  endereco: string;
+  cpf: string;
+  telefone: string;
+  dataNascimento: Date;
+}
+
+export interface User {
+  id?: string;
+  email: string;
+  perfil: 'admin' | 'cliente';
+  senha: string;
+  pessoa: Person;
 }
 
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
 }
 
