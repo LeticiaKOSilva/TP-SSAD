@@ -1,7 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '../context/useAuthContext';
 import InputMask from 'react-input-mask';
+import useAuth from '../context/useAuthContext';
+import { Person } from '../types';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -14,7 +15,13 @@ export default function Register() {
   const [birthDate, setBirthDate] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user } = useAuth();
+
+  if (!user) {
+    console.error('User not found');
+    navigate('/');
+    return;
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,41 +31,74 @@ export default function Register() {
       setError('As senhas não coincidem');
       return;
     }
-    const userData = {
-      usuario: {
-        senha: password,
-        perfil: "Administrador",
-        pessoa: {
-          nome: name,
-          endereco: address,
-          cpf: cpf,
-          email: email,
-          telefone: phone,
-          dataNascimento: new Date(birthDate.split('/').reverse().join('-')),
-        }
-      },
-    };
 
-    fetch('http://localhost:8080/SuperDiaWebApi/rest/usuario/create', {
+    let pessoa = {
+      nome: name,
+      endereco: address,
+      cpf: cpf,
+      email: email,
+      telefone: phone,
+      dataNascimento: new Date(birthDate.split('/').reverse().join('-')),
+    }
+
+    try {
+      pessoa = await createPessoa(pessoa);
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao criar pessoa");
+    }
+
+    try {
+      await createUsuario({ login: user.email, senha: user?.senha,  usuario: {senha: password, perfil: "cliente", pessoa: { ...pessoa}}});
+
+      alert("Cliente criado com sucesso");
+      navigate('/admin');
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao criar usuario");
+    }
+  };
+
+  const createPessoa = async (pessoa: Person) => {
+    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/pessoa/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(userData),
+      body: JSON.stringify({pessoa}),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('User created:', data);
-      })
-      .catch((error) => {
-        console.error('Error creating user:', error);
-      });
-  };
+    
+    if (!resp.ok) {
+      const error = await resp.text();
+      throw new Error(error);
+    }
+
+    const data = await resp.json();
+    return data;
+  }
+
+  const createUsuario = async (usuario) => {
+    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/usuario/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(usuario),
+    })
+    
+    if (!resp.ok) {
+      const error = await resp.text();
+      throw new Error(error);
+    } else {
+      const data = await resp.json();
+      console.log({data});
+    }
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-12 flex flex-col items-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Criar Conta</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Criar Cliente</h2>
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             {error}
