@@ -42,12 +42,12 @@ public class PessoaResource implements Serializable {
     @Path("/create")
     public Response create(AuthRequest authRequest) {
         try {
-        	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
-        		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
+       	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
+       		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	
         	Pessoa pessoa = authRequest.getPessoa();
-        	pessoaService.create(pessoa);
-        	return Response.status(Response.Status.CREATED).entity(pessoa).build();
+        	Pessoa createdPessoa = pessoaService.create(pessoa);
+        	return Response.status(Response.Status.CREATED).entity(createdPessoa).build();
         	
         }catch (Exception e) {
         	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar pessoa").build();

@@ -5,7 +5,7 @@ import java.util.List;
 import br.com.superdia.modelo.Pessoa;
 
 public interface IPessoa {
-	void create(Pessoa pessoa);
+	Pessoa create(Pessoa pessoa);
 	void delete(Pessoa pessoa);
 	void update(Pessoa pessoa);
 	List<Pessoa> getPessoas();

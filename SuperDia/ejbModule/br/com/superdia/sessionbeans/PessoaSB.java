@@ -18,8 +18,10 @@ public class PessoaSB implements IPessoa {
 	EntityManager em;
 
 	@Override
-	public void create(Pessoa pessoa) {
+	public Pessoa create(Pessoa pessoa) {
 		em.persist(pessoa);
+		em.flush();
+		return pessoa;
 	}
 
 	@Override
