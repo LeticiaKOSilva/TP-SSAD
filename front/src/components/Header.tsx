@@ -6,7 +6,8 @@ import useCart from '../context/useCartContext';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { user, logout } = useAuth(); // Adicionamos a função logout do contexto
   const { items } = useCart();
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -22,7 +23,9 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-indigo-600">Loja</Link>
+            <Link to="/" className="text-gray-700 hover:text-indigo-600">
+              Loja
+            </Link>
             <Link to="/cart" className="text-gray-700 hover:text-indigo-600 relative">
               Carrinho
               {totalItems > 0 && (
@@ -35,26 +38,45 @@ export default function Header() {
 
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
-              <Link
-                to={user.perfil === 'admin' ? '/admin' : '/profile'}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                <User className="h-4 w-4 mr-2" />
-                {user.email}
-              </Link>
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 focus:outline-none"
+                >
+                  <User className="h-6 w-6 text-gray-700" />
+                  <span className="text-gray-700">{user.pessoa.nome}</span>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg">
+                    <div className="py-1">
+                      {user.perfil === 'admin' && (
+                        <Link
+                          to="/register"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Cadastrar Cliente
+                        </Link>
+                      )}
+                      <button
+                        onClick={logout}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Sair
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-indigo-600"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                 >
-                  Cadastro
+                  Login
                 </Link>
               </>
             )}
@@ -81,12 +103,14 @@ export default function Header() {
             <Link
               to="/"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600"
+              onClick={() => setIsMenuOpen(false)}
             >
               Loja
             </Link>
             <Link
               to="/cart"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600"
+              onClick={() => setIsMenuOpen(false)}
             >
               Carrinho ({totalItems})
             </Link>
@@ -95,15 +119,29 @@ export default function Header() {
                 <Link
                   to="/login"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Login
                 </Link>
-                <Link
-                  to="/register"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600"
+              </>
+            )}
+            {user && (
+              <>
+                {user.perfil === 'admin' && (
+                  <Link
+                    to="/register"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Cadastrar Cliente
+                  </Link>
+                )}
+                <button
+                  onClick={logout}
+                  className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600"
                 >
-                  Cadastro
-                </Link>
+                  Sair
+                </button>
               </>
             )}
           </div>
