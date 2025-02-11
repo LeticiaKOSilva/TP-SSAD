@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Cart from './pages/Cart';
@@ -26,6 +26,18 @@ function ProtectedRoute({ children, adminOnly = false }: { children: ReactNode, 
   return <>{children}</>;
 }
 
+function AdminRedirect() {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  // Redireciona para a página de admin se o usuário for admin
+  if (user?.perfil === 'admin' && (location.pathname === '/' || location.pathname === '/cart')) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return null;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -33,6 +45,7 @@ function App() {
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="min-h-screen bg-gray-100">
             <Header />
+            <AdminRedirect />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/cart" element={<Cart />} />
