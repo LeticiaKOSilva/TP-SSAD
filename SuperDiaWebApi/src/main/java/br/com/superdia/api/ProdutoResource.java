@@ -42,8 +42,8 @@ public class ProdutoResource implements Serializable {
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	Produto produto = authRequest.getProduto();
         	
-            produtoService.create(produto);
-            return Response.status(Response.Status.CREATED).entity(produto).build();
+            Produto createdProduto = produtoService.create(produto);
+            return Response.status(Response.Status.CREATED).entity(createdProduto).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao criar produto").build();
         }
@@ -76,6 +76,17 @@ public class ProdutoResource implements Serializable {
             return Response.ok().entity("Produto removido com sucesso!").build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao remover produto").build();
+        }
+    }
+    
+    @GET
+    @Path("/")
+    public Response get() {
+        try {
+            List<Produto> produtos = produtoService.getProdutos();
+            return Response.ok(produtos).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar produtos").build();
         }
     }
 

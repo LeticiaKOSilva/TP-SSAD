@@ -7,7 +7,7 @@ import jakarta.ejb.Remote;
 
 @Remote
 public interface IProduto {
-	public void create(Produto produto);
+	public Produto create(Produto produto);
 	public void delete(Produto produto);
 	public void update(Produto produto);
 	public List<Produto>getProdutos();

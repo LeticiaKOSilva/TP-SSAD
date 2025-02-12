@@ -17,8 +17,10 @@ public class ProdutoSB implements IProduto {
 	private EntityManager em;
 	
 	@Override
-	public void create(Produto produto) {
+	public Produto create(Produto produto) {
 		em.persist(produto);
+		em.flush();
+		return produto;
 	}
 
 	@Override
