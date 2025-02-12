@@ -13,7 +13,7 @@ public class Produto implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String nome;
     private String descricao;
     private double preco;
@@ -32,7 +32,7 @@ public class Produto implements Serializable {
         this.quantidadeEstoque = quantidadeEstoque;
     }
 
-    public Produto(int id, String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque) {
+    public Produto(Long id, String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -41,7 +41,7 @@ public class Produto implements Serializable {
         this.quantidadeEstoque = quantidadeEstoque;
     }
     
-    public Produto(int id, String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque,
+    public Produto(Long id, String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque,
 			String urlImagem) {
 		super();
 		this.id = id;
@@ -64,12 +64,12 @@ public class Produto implements Serializable {
 		this.urlImagem = urlImagem;
 	}
 
-	public Produto(int id) {
+	public Produto(Long id) {
         this.id = id;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
@@ -106,8 +106,15 @@ public class Produto implements Serializable {
     @Override
     public String toString() {
         return String.format(
-            "Produto{id=%d, nome='%s', descricao='%s', preco=%.2f, estoqueMinimo=%d, quantidadeEstoque=%d}",
-            id, nome, descricao, preco, estoqueMinimo, quantidadeEstoque
+            "ID: %6d \t %-55s \t R$ %8.2f \t %d un.",
+            id, formatarNome(nome), preco, quantidadeEstoque
         );
+    }
+
+    private String formatarNome(String nome) {
+        if (nome.length() > 55) {
+            return nome.substring(0, 52) + "...";
+        }
+        return String.format("%-55s", nome);
     }
 }

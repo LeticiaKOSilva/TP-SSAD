@@ -15,7 +15,7 @@ import jakarta.persistence.TypedQuery;
 public class ProdutoSB implements IProduto {
 	@PersistenceContext(unitName = "SuperDia")
 	private EntityManager em;
-	
+
 	@Override
 	public Produto create(Produto produto) {
 		em.persist(produto);
@@ -35,8 +35,19 @@ public class ProdutoSB implements IProduto {
 
 	@Override
 	public List<Produto> getProdutos() {
-		TypedQuery<Produto>produtos = em.createQuery("SELECT p FROM Produto p",Produto.class);
+		TypedQuery<Produto> produtos = em.createQuery("SELECT p FROM Produto p", Produto.class);
 		return produtos.getResultList();
+	}
+
+	@Override
+	public Produto getById(Long id) {
+		TypedQuery<Produto> query = em.createQuery(
+				"SELECT p FROM Produto p WHERE p.id = :id", Produto.class);
+		query.setParameter("id", id);
+
+		List<Produto> resultList = query.getResultList();
+
+		return resultList.isEmpty() ? null : resultList.get(0);
 	}
 
 }

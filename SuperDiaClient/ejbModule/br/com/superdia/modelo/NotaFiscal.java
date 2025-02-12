@@ -21,7 +21,7 @@ public class NotaFiscal implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     
     @ManyToOne
     private Usuario cliente;
@@ -34,7 +34,7 @@ public class NotaFiscal implements Serializable {
     
     public NotaFiscal() {}
 
-	public NotaFiscal(int id, Usuario cliente, List<Item> itens, Calendar data) {
+	public NotaFiscal(Long id, Usuario cliente, List<Item> itens, Calendar data) {
 		super();
 		this.id = id;
 		this.cliente = cliente;
@@ -42,11 +42,11 @@ public class NotaFiscal implements Serializable {
 		this.data = data;
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

@@ -65,7 +65,7 @@ public class StockManager {
 
     private static void updateProduct(Scanner scanner) {
         System.out.println("\n=== ATUALIZAR PRODUTO ===");
-        int id = readInt("ID do Produto a atualizar: ", scanner);
+        Long id = Long.valueOf(readInt("ID do Produto a atualizar: ", scanner));
         String nome = readString("Novo Nome: ", scanner);
         String descricao = readString("Nova Descrição: ", scanner);
         double preco = readDouble("Novo Preço: ", scanner);
@@ -78,7 +78,7 @@ public class StockManager {
 
     private static void removeProduct(Scanner scanner) {
         System.out.println("\n=== REMOVER PRODUTO ===");
-        int id = readInt("ID do Produto a remover: ", scanner);
+        Long id = Long.valueOf(readInt("ID do Produto a remover: ", scanner));
 
         Produto produto = new Produto(id);
         sendPostRequest("produto/delete", produto, "Produto removido com sucesso!");

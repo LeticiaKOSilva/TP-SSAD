@@ -107,6 +107,20 @@ public class ProdutoResource implements Serializable {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar produtos").build();
         }
     }
+    
+    @POST
+    @Path("/getById")
+    public Response getById(AuthRequest authRequest) {
+        try {
+        	if(!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
+        		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
+        	
+            Produto produto = produtoService.getById(authRequest.produto.getId());
+            return Response.ok(produto).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar produtos").build();
+        }
+    }
 
     public static class AuthRequest {
         private String login;

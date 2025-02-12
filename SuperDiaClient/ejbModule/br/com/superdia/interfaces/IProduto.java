@@ -11,4 +11,5 @@ public interface IProduto {
 	public void delete(Produto produto);
 	public void update(Produto produto);
 	public List<Produto>getProdutos();
+	public Produto getById(Long id);
 }
