@@ -32,30 +32,30 @@ export default function Register() {
       return;
     }
 
-    let pessoa = {
-      nome: name,
-      endereco: address,
-      cpf: cpf,
-      email: email,
-      telefone: phone,
-      dataNascimento: new Date(birthDate.split('/').reverse().join('-')),
-    }
-
     try {
+      let pessoa = {
+        nome: name,
+        endereco: address,
+        cpf: cpf,
+        email: email,
+        telefone: phone,
+        dataNascimento: new Date(birthDate.split('/').reverse().join('-')),
+      }
+
       pessoa = await createPessoa(pessoa);
+
+      try {
+        await createUsuario({ senha: password, perfil: "cliente", pessoa: { ...pessoa} });
+  
+        alert("Cliente criado com sucesso");
+        navigate('/admin');
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao criar usuario");
+      }
     } catch (error) {
       console.error(error);
       alert("Erro ao criar pessoa");
-    }
-
-    try {
-      await createUsuario({ login: user.pessoa.email, senha: user?.senha,  usuario: {senha: password, perfil: "cliente", pessoa: { ...pessoa}}});
-
-      alert("Cliente criado com sucesso");
-      navigate('/admin');
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao criar usuario");
     }
   };
 
@@ -65,7 +65,7 @@ export default function Register() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({pessoa}),
+      body: JSON.stringify({ login: user.pessoa.email, senha: user?.senha, pessoa }),
     })
     
     if (!resp.ok) {
@@ -83,7 +83,7 @@ export default function Register() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(usuario),
+      body: JSON.stringify({ login: user.pessoa.email, senha: user?.senha, usuario }),
     })
     
     if (!resp.ok) {
