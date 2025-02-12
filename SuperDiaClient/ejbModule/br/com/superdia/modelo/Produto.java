@@ -19,8 +19,9 @@ public class Produto implements Serializable {
     private double preco;
     private int estoqueMinimo;
     private int quantidadeEstoque;
+    private String urlImagem;
 
-    public Produto() {
+	public Produto() {
     }
 
     public Produto(String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque) {
@@ -39,8 +40,31 @@ public class Produto implements Serializable {
         this.estoqueMinimo = estoqueMinimo;
         this.quantidadeEstoque = quantidadeEstoque;
     }
+    
+    public Produto(int id, String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque,
+			String urlImagem) {
+		super();
+		this.id = id;
+		this.nome = nome;
+		this.descricao = descricao;
+		this.preco = preco;
+		this.estoqueMinimo = estoqueMinimo;
+		this.quantidadeEstoque = quantidadeEstoque;
+		this.urlImagem = urlImagem;
+	}
+    
+	public Produto(String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque,
+			String urlImagem) {
+		super();
+		this.nome = nome;
+		this.descricao = descricao;
+		this.preco = preco;
+		this.estoqueMinimo = estoqueMinimo;
+		this.quantidadeEstoque = quantidadeEstoque;
+		this.urlImagem = urlImagem;
+	}
 
-    public Produto(int id) {
+	public Produto(int id) {
         this.id = id;
     }
 
@@ -61,6 +85,14 @@ public class Produto implements Serializable {
 
     public int getQuantidadeEstoque() { return quantidadeEstoque; }
     public void setQuantidadeEstoque(int quantidadeEstoque) { this.quantidadeEstoque = quantidadeEstoque; }
+    
+    public String getUrlImagem() {
+		return urlImagem;
+	}
+
+	public void setUrlImagem(String urlImagem) {
+		this.urlImagem = urlImagem;
+	}
 
     public String toJson() {
         String precoFormatted = String.format("%.2f", preco).replace(',', '.');
