@@ -33,6 +33,10 @@ public class ProdutoResource implements Serializable {
 		if (usuario != null) return usuario.getPerfil();
 		return "";
 	}
+	
+    public boolean isAuthenticated(String login, String senha) {
+        return usuarioService.authentication(login, senha) != null;
+    }
 
     @POST
     @Path("/create")
@@ -94,7 +98,7 @@ public class ProdutoResource implements Serializable {
     @Path("/getProdutos")
     public Response getProdutos(AuthRequest authRequest) {
         try {
-        	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
+        	if(!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	
             List<Produto> produtos = produtoService.getProdutos();

@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import br.com.superdia.modelo.Item;
 import br.com.superdia.modelo.Produto;
 import br.com.superdia.modelo.Usuario;
 import jakarta.ws.rs.client.Client;
@@ -19,10 +20,12 @@ public class CashRegister {
 	
 	private static final String BASE_URL = "http://localhost:8080/SuperDiaWebApi/rest/";
 	
-	private String email, password;
+	private static final int AUTH_SUCCESS = 1,
+			AUTH_FAILURE = 0,
+			AUTH_ERROR = -1;
 	
 	private Usuario cashier;
-	private List<Produto> cart;
+	private List<Item> cart;
 	
 	public static void main(String[] args) {
 		new CashRegister();
@@ -32,10 +35,10 @@ public class CashRegister {
 		Scanner scanner = new Scanner(System.in);
 		
 		cashier = new Usuario();
-		cart = null;
+		clearCart();
 		
-        authenticate(scanner);
-        menu(scanner);
+        if(authenticate(scanner))
+        	menu(scanner);
         
         scanner.close();
 	}
@@ -57,12 +60,12 @@ public class CashRegister {
 	}
 
 	private void newCart() {
-		cart = new ArrayList<Produto>();
+		cart = new ArrayList<Item>();
 	}
 
 	private void cartMenu(Scanner scanner) {
 		if(cart == null) {
-			System.out.println("\nNão foi encontrado nenhum carrinho! Utilize a opção 1.\n");
+			System.out.println("\n\nNão foi encontrado nenhum carrinho! Utilize a opção 1.");
 			return;
 		}
 		
@@ -76,13 +79,14 @@ public class CashRegister {
             	case 1 -> addProduct();
             	case 2 -> removeProduct();
             	case 3 -> listProducts();            	
-            	case 4 -> checkout();            	
+            	case 4 -> checkout();  
+            	case 5 -> { clearCart(); return; }
                 case 0 -> { return; } 
                 default -> System.err.println("\n\nOpção inválida!\n");
             }
         } while (option != 0);
 	}
-	
+
 	private void addProduct() {
 		// TODO Auto-generated method stub
 	}
@@ -113,28 +117,41 @@ public class CashRegister {
 	private void checkout() {
 		// TODO Auto-generated method stub
 	}
-
-	private void authenticate(Scanner scanner) {
-        boolean authorized = false;
-        do {
-        	authorized = obtainCredentials(scanner);
-        } while(!authorized);
-
-        displayWelcomeMessage(cashier.getPessoa().getNome());
+	
+	private void clearCart() {
+		cart = null;
 	}
 
-	private boolean obtainCredentials(Scanner scanner) {
-        email = readString("Digite seu email de usuário: ", scanner);
-        password = readString("Digite sua senha: ", scanner);
+	private boolean authenticate(Scanner scanner) {
+        int authorized;
+        do {
+        	authorized = obtainCredentials(scanner);
+        	if (authorized == AUTH_ERROR) return false;
+        } while(authorized == AUTH_FAILURE);
+
+        displayWelcomeMessage(cashier.getPessoa().getNome());
+        return true;
+	}
+
+	private int obtainCredentials(Scanner scanner) {
+        String email = readString("Digite seu email de usuário: ", scanner);
+        String password = readString("Digite sua senha: ", scanner);
         return authenticateUser(email, password);
     }
 	
-    private boolean authenticateUser(String email, String password) {
-        String json = authJson();
+    private int authenticateUser(String email, String password) {
+        String json = authJson(email, password);
         Client client = ClientBuilder.newClient();
-        Response response = client.target(BASE_URL + "usuario/authenticate")
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(json));
+        Response response;
+        
+        try {
+        	response = client.target(BASE_URL + "usuario/authenticate")
+                    .request(MediaType.APPLICATION_JSON)
+                    .post(Entity.json(json));
+        } catch (Exception e) {
+        	System.err.println("\nNão foi possível se conectar ao servidor!");
+        	return AUTH_ERROR;
+		}
 
         String responseBody = response.readEntity(String.class);
         response.close();
@@ -147,16 +164,16 @@ public class CashRegister {
                 Usuario usuario = objectMapper.readValue(responseBody, Usuario.class);
                 if (!usuario.getPerfil().equals(Usuario.PERFIL_CAIXA)) {
                 	System.err.println("\nPerfil inválido! Tente novamente.");
-                	return false;
+                	return AUTH_FAILURE;
                 }
                 cashier = usuario;
             } catch (Exception e) {
                 System.err.println("\nErro ao desserializar JSON: " + e.getMessage());
             }
-            return true;
+            return AUTH_SUCCESS;
         } else {
             System.err.println("\nErro: " + responseBody);
-            return false;
+            return AUTH_ERROR;
         }
     }
 	
@@ -177,6 +194,7 @@ public class CashRegister {
     		    "2. Remover Produto\n" +
     		    "3. Listar Produtos\n" +
     		    "4. Finalizar Compra\n" +
+    		    "5. Cancelar Compra\n" +
     		    "0. Voltar\n" +
     		    "Escolha uma opção: "
     		));
@@ -190,11 +208,15 @@ public class CashRegister {
 	}
     
     private String authJson() {
+        return "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\"}";
+    }
+    
+    private String authJson(String email, String password) {
         return "{\"login\":\"" + email + "\",\"senha\":\"" + password + "\"}";
     }
 
     private String authJson(Produto produto) {
-        String json = "{\"login\":\"" + email + "\",\"senha\":\"" + password + "\",\"produto\":" + produto.toJson() + "}";
+        String json = "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\",\"produto\":" + produto.toJson() + "}";
         System.out.println("JSON Enviado: " + json);
         return json;
     }

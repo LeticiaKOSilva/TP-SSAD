@@ -29,7 +29,8 @@
 				<configuration>
 					<packageName>superdia.webservices.classes</packageName>
 					<wsdlUrls>
-						<wsdlUrl>https://secure.ftipgw.com/ArgoFire/validate.asmx?WSDL</wsdlUrl>
+						<wsdlUrl>
+							https://secure.ftipgw.com/ArgoFire/validate.asmx?WSDL</wsdlUrl>
 					</wsdlUrls>
 					<keep>true</keep>
 					<sourceDestDir>${sourcesDir}</sourceDestDir>
@@ -94,7 +95,7 @@
 			<artifactId>jaxb-runtime</artifactId>
 			<version>4.0.5</version>
 		</dependency>
-						<!--
+		<!--
 		https://mvnrepository.com/artifact/jakarta.xml.ws/jakarta.xml.ws-api -->
 		<dependency>
 			<groupId>jakarta.xml.ws</groupId>
