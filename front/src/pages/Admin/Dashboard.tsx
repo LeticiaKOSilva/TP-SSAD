@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { AlertTriangle, Upload, Plus } from 'lucide-react';
 import { DEFAULT_PRODUCT_IMAGE, Product } from '../../types';
 import useAuth from '../../context/useAuthContext';
+import * as XLSX from 'xlsx';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -128,12 +129,75 @@ export default function Dashboard() {
     return await resp.json();
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // In a real app, you would process the CSV/XLSX file here
-      console.log('Processing file:', file.name);
-    }
+    if (!file) return;
+  
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const data = event.target?.result;
+      if (data) {
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  
+        if (json.length > 0) {
+          const headers = (json[0] as string[]).map(header =>
+            header
+              .toLowerCase() // Converte para minúsculas
+              .replace(/\s+/g, '') // Remove espacos em branco
+              .replace(/_/g, '') // Remove underline
+          );
+  
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const products: Partial<Product>[] = json.slice(1).map((row: any) => {
+            const product: Partial<Product> = {};
+            headers.forEach((header, index) => {
+              const value = row[index];
+              switch (header) {
+                case 'nome':
+                  product.nome = value;
+                  break;
+                case 'descricao':
+                case 'descricão':
+                  product.descricao = value;
+                  break;
+                case 'preco':
+                case 'preço':
+                  product.preco = parseFloat(value);
+                  break;
+                case 'quantidadeemestoque':
+                  product.quantidadeEstoque = parseInt(value, 10);
+                  break;
+                case 'estoqueminimo':
+                case 'estoquemínimo':
+                  product.estoqueMinimo = parseInt(value, 10);
+                  break;
+                case 'urldaimagem':
+                case 'urlimagem':
+                  product.urlImagem = value;
+                  break;
+                default:
+                  break;
+              }
+            });
+            return product;
+          });
+  
+          try {
+            await Promise.all(products.map(product => createProduct(product as Product)));
+            alert('Produtos importados com sucesso!');
+            fetchProducts();
+          } catch (error) {
+            console.error(error);
+            alert('Erro ao importar produtos');
+          }
+        }
+      }
+    };
+  
+    reader.readAsBinaryString(file);
   };
 
   return (
