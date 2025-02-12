@@ -1,47 +1,96 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { AlertTriangle, Upload, Plus } from 'lucide-react';
-import { Product } from '../../types';
+import { DEFAULT_PRODUCT_IMAGE, Product } from '../../types';
+import useAuth from '../../context/useAuthContext';
 
 export default function Dashboard() {
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: '1',
-      name: 'Smartphone XYZ',
-      description: 'Um smartphone incrível com câmera de alta resolução',
-      price: 1999.99,
-      imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=800',
-      stock: 2
-    },
-    {
-      id: '2',
-      name: 'Notebook Pro',
-      description: 'Notebook potente para todas as suas necessidades',
-      price: 4999.99,
-      imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800',
-      stock: 5
-    },
-  ]);
+  const { user } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
 
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({});
 
-  const lowStockProducts = products.filter(product => product.stock <= 3);
+  const lowStockProducts = products.filter(product => product.quantidadeEstoque <= product.estoqueMinimo);
 
-  const handleAddProduct = (e: FormEvent) => {
-    e.preventDefault();
-    if (newProduct.name && newProduct.price && newProduct.stock) {
-      setProducts([
-        ...products,
-        {
-          ...newProduct,
-          id: Math.random().toString(36).substr(2, 9),
-          imageUrl: newProduct.imageUrl || 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800',
-        } as Product,
-      ]);
-      setShowAddProduct(false);
-      setNewProduct({});
+  useEffect(() => {
+    if (user) {
+      fetchProducts();
+    }
+  }, [user]);
+
+  const fetchProducts = async () => {
+    try {
+      const products = await getProducts();
+      setProducts(
+        products.map((product) => ({
+          ...product,
+          imageUrl:
+            product.imageUrl ||
+            DEFAULT_PRODUCT_IMAGE,
+        })) as Product[]
+      );
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao buscar produtos');
     }
   };
+
+  if (!user) return
+
+  const getProducts = async () => {
+    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/produto/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    if (!resp.ok) {
+      const error = await resp.text();
+      throw new Error(error);
+    }
+  
+    return await resp.json();
+  }
+
+  const handleAddProduct = async (e: FormEvent) => {
+    e.preventDefault();
+    if (newProduct.nome && newProduct.preco && newProduct.quantidadeEstoque) {
+      try {
+        const product = await createProduct(newProduct as Product);
+
+        setProducts([
+          ...products,
+          {
+            ...product,
+            imageUrl: product.imageUrl || 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800',
+          } as Product,
+        ]);
+        setShowAddProduct(false);
+        setNewProduct({});
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao criar produto');
+      }
+    }
+  };
+
+  const createProduct = async (product: Product) => {
+    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/produto/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ login: user.pessoa.email, senha: user.senha, produto: product}),
+    });
+    
+    if (!resp.ok) {
+      const error = await resp.text();
+      throw new Error(error);
+    }
+
+    return await resp.json();
+  }
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,7 +138,7 @@ export default function Dashboard() {
               <ul className="list-disc list-inside">
                 {lowStockProducts.map(product => (
                   <li key={product.id} className="text-yellow-700">
-                    {product.name} - {product.stock} unidades restantes
+                    {product.nome} - {product.quantidadeEstoque} unidades restantes
                   </li>
                 ))}
               </ul>
@@ -104,28 +153,28 @@ export default function Dashboard() {
                 <div className="flex items-center">
                   <img
                     src={product.imageUrl}
-                    alt={product.name}
+                    alt={product.nome}
                     className="h-10 w-10 rounded-full object-cover"
                   />
                   <div className="ml-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {product.name}
+                      {product.nome}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {product.description}
+                      {product.descricao}
                     </div>
                   </div>
                 </div>
                 <div className="mt-2">
                   <div className="text-sm text-gray-900">
-                    R$ {product.price.toFixed(2)}
+                    R$ {product.preco.toFixed(2)}
                   </div>
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    product.stock <= 3
+                    product.quantidadeEstoque <= 3
                       ? 'bg-red-100 text-red-800'
                       : 'bg-green-100 text-green-800'
                   }`}>
-                    {product.stock} unidades
+                    {product.quantidadeEstoque} unidades
                   </span>
                 </div>
                 <div className="mt-2">
@@ -160,31 +209,31 @@ export default function Dashboard() {
                     <div className="flex items-center">
                       <img
                         src={product.imageUrl}
-                        alt={product.name}
+                        alt={product.nome}
                         className="h-10 w-10 rounded-full object-cover"
                       />
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {product.name}
+                          {product.nome}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {product.description}
+                          {product.descricao}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      R$ {product.price.toFixed(2)}
+                      R$ {product.preco.toFixed(2).replace('.', ',')}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      product.stock <= 3
+                      product.quantidadeEstoque <= 3
                         ? 'bg-red-100 text-red-800'
                         : 'bg-green-100 text-green-800'
                     }`}>
-                      {product.stock} unidades
+                      {product.quantidadeEstoque} unidades
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -212,8 +261,8 @@ export default function Dashboard() {
                   <input
                     type="text"
                     required
-                    value={newProduct.name || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                    value={newProduct.nome || ''}
+                    onChange={(e) => setNewProduct({ ...newProduct, nome: e.target.value })}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                   />
                 </div>
@@ -222,8 +271,8 @@ export default function Dashboard() {
                     Descrição
                   </label>
                   <textarea
-                    value={newProduct.description || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                    value={newProduct.descricao || ''}
+                    onChange={(e) => setNewProduct({ ...newProduct, descricao: e.target.value })}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                   />
                 </div>
@@ -235,20 +284,32 @@ export default function Dashboard() {
                     type="number"
                     step="0.01"
                     required
-                    value={newProduct.price || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+                    value={newProduct.preco || ''}
+                    onChange={(e) => setNewProduct({ ...newProduct, preco: parseFloat(e.target.value) })}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Estoque
+                    Quantidade em Estoque
                   </label>
                   <input
                     type="number"
                     required
-                    value={newProduct.stock || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
+                    value={newProduct.quantidadeEstoque || ''}
+                    onChange={(e) => setNewProduct({ ...newProduct, quantidadeEstoque: parseInt(e.target.value) })}
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Estoque Mínimo
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={newProduct.estoqueMinimo || ''}
+                    onChange={(e) => setNewProduct({ ...newProduct, estoqueMinimo: parseInt(e.target.value) })}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                   />
                 </div>

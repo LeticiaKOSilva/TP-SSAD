@@ -13,15 +13,15 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <img
         src={product.imageUrl}
-        alt={product.name}
+        alt={product.nome}
         className="w-full h-48 object-cover"
       />
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-        <p className="mt-1 text-gray-500 text-sm">{product.description}</p>
+        <h3 className="text-lg font-semibold text-gray-900">{product.nome}</h3>
+        <p className="mt-1 text-gray-500 text-sm">{product.descricao}</p>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-xl font-bold text-gray-900">
-            R$ {product.price.toFixed(2)}
+            R$ {product.preco.toFixed(2)}
           </span>
           <button
             onClick={() => addToCart(product)}

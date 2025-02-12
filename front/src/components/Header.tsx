@@ -10,7 +10,7 @@ export default function Header() {
   const { user, logout } = useAuth(); // Adicionamos a função logout do contexto
   const { items } = useCart();
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = items.reduce((sum, item) => sum + item.quantidade, 0);
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">

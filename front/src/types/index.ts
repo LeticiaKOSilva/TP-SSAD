@@ -1,14 +1,17 @@
+export const DEFAULT_PRODUCT_IMAGE = 'https://images.pexels.com/photos/9070110/pexels-photo-9070110.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1';
+
 export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  stock: number;
+  id?: string;
+  nome: string;
+  descricao: string;
+  preco: number;
+  estoqueMinimo: number;
+  quantidadeEstoque: number;
+  imageUrl?: string;
 }
 
 export interface CartItem extends Product {
-  quantity: number;
+  quantidade: number;
 }
 
 export interface Person {
@@ -23,7 +26,6 @@ export interface Person {
 
 export interface User {
   id?: string;
-  email: string;
   perfil: 'admin' | 'cliente';
   senha: string;
   pessoa: Person;

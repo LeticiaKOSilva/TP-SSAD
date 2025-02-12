@@ -11,7 +11,7 @@ export default function Cart() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const navigate = useNavigate();
 
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = items.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
 
   const handleCheckout = () => {
     if (!user) {
@@ -36,21 +36,21 @@ export default function Cart() {
                   <div className="flex items-center gap-4">
                     <img
                       src={item.imageUrl}
-                      alt={item.name}
+                      alt={item.nome}
                       className="h-16 w-16 object-cover rounded"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">{item.name}</div>
+                      <div className="font-medium text-gray-900">{item.nome}</div>
                       <div className="text-sm text-gray-500 mt-1">
-                        R$ {item.price.toFixed(2)} × {item.quantity}
+                        R$ {item.preco.toFixed(2)} × {item.quantidade}
                       </div>
                       <div className="text-sm font-medium text-gray-900 mt-1">
-                        R$ {(item.price * item.quantity).toFixed(2)}
+                        R$ {(item.preco * item.quantidade).toFixed(2)}
                       </div>
                     </div>
                   </div>
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.id!)}
                     className="text-red-600 hover:text-red-900"
                   >
                     <Trash2 className="h-5 w-5" />
@@ -59,14 +59,14 @@ export default function Cart() {
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.id!, item.quantidade - 1)}
                       className="p-1 rounded-md hover:bg-gray-100"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
-                    <span className="text-sm text-gray-900">{item.quantity}</span>
+                    <span className="text-sm text-gray-900">{item.quantidade}</span>
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.id!, item.quantidade + 1)}
                       className="p-1 rounded-md hover:bg-gray-100"
                     >
                       <Plus className="h-4 w-4" />
@@ -104,32 +104,32 @@ export default function Cart() {
                       <div className="flex items-center">
                         <img
                           src={item.imageUrl}
-                          alt={item.name}
+                          alt={item.nome}
                           className="h-16 w-16 object-cover rounded"
                         />
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {item.name}
+                            {item.nome}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        R$ {item.price.toFixed(2)}
+                        R$ {item.preco.toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id!, item.quantidade - 1)}
                           className="p-1 rounded-md hover:bg-gray-100"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="text-sm text-gray-900">{item.quantity}</span>
+                        <span className="text-sm text-gray-900">{item.quantidade}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id!, item.quantidade + 1)}
                           className="p-1 rounded-md hover:bg-gray-100"
                         >
                           <Plus className="h-4 w-4" />
@@ -138,12 +138,12 @@ export default function Cart() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        R$ {(item.price * item.quantity).toFixed(2)}
+                        R$ {(item.preco * item.quantidade).toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.id!)}
                         className="text-red-600 hover:text-red-900"
                       >
                         <Trash2 className="h-5 w-5" />

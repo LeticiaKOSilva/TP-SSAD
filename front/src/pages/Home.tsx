@@ -1,28 +1,47 @@
+import { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
-import { Product } from '../types';
-
-// Mock products data
-const products: Product[] = [
-  {
-    id: '1',
-    name: 'Smartphone XYZ',
-    description: 'Um smartphone incrível com câmera de alta resolução',
-    price: 1999.99,
-    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=800',
-    stock: 10
-  },
-  {
-    id: '2',
-    name: 'Notebook Pro',
-    description: 'Notebook potente para todas as suas necessidades',
-    price: 4999.99,
-    imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800',
-    stock: 5
-  },
-  // Add more mock products as needed
-];
+import { DEFAULT_PRODUCT_IMAGE, Product } from '../types';
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const products = await getProducts();
+      setProducts(
+        products.map((product) => ({
+          ...product,
+          imageUrl:
+            product.imageUrl ||
+            DEFAULT_PRODUCT_IMAGE,
+        })) as Product[]
+      );
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao buscar produtos');
+    }
+  };
+
+  const getProducts = async () => {
+    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/produto/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    if (!resp.ok) {
+      const error = await resp.text();
+      throw new Error(error);
+    }
+  
+    return await resp.json();
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Produtos em Destaque</h1>

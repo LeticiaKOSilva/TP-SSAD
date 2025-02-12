@@ -49,7 +49,7 @@ export default function Register() {
     }
 
     try {
-      await createUsuario({ login: user.email, senha: user?.senha,  usuario: {senha: password, perfil: "cliente", pessoa: { ...pessoa}}});
+      await createUsuario({ login: user.pessoa.email, senha: user?.senha,  usuario: {senha: password, perfil: "cliente", pessoa: { ...pessoa}}});
 
       alert("Cliente criado com sucesso");
       navigate('/admin');
@@ -89,10 +89,9 @@ export default function Register() {
     if (!resp.ok) {
       const error = await resp.text();
       throw new Error(error);
-    } else {
-      const data = await resp.json();
-      console.log({data});
     }
+
+    return await resp.json();
   }
 
   return (

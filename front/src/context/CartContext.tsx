@@ -12,11 +12,11 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       if (existingItem) {
         return currentItems.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantidade: item.quantidade + 1 }
             : item
         );
       }
-      return [...currentItems, { ...product, quantity: 1 }];
+      return [...currentItems, { ...product, quantidade: 1 }];
     });
   };
 

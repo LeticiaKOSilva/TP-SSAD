@@ -31,7 +31,7 @@ export default function Checkout() {
   });
   const [loading, setLoading] = useState(false);
 
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = items.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
   const shipping = 15.0;
   const finalTotal = total + shipping;
 
@@ -222,20 +222,20 @@ export default function Checkout() {
                     <div className="flex items-center">
                       <img
                         src={item.imageUrl}
-                        alt={item.name}
+                        alt={item.nome}
                         className="h-16 w-16 object-cover rounded"
                       />
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-900">
-                          {item.name}
+                          {item.nome}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Quantidade: {item.quantity}
+                          Quantidade: {item.quantidade}
                         </p>
                       </div>
                     </div>
                     <p className="text-sm font-medium text-gray-900">
-                      R$ {(item.price * item.quantity).toFixed(2)}
+                      R$ {(item.preco * item.quantidade).toFixed(2)}
                     </p>
                   </div>
                 ))}
