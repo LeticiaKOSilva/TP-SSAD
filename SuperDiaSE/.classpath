@@ -24,8 +24,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/SuperDiaClient"/>
-	<classpathentry kind="lib" path="D:/Wildfly/wildfly-33.0.2.Final/bin/client/jboss-cli-client.jar"/>
-	<classpathentry kind="lib" path="D:/Wildfly/wildfly-33.0.2.Final/bin/client/jboss-client.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vinic/OneDrive/Documentos/Curso/TSI/Sexto_Periodo/Servicos_de_Suporte_a_Aplicacoes_Distribuidas/TP/hibernate-core-6.4.4.Final.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vitor/OneDrive - 6pv31s/IF/6-periodo/2024/SSAD/hibernate-core-6.4.4.Final.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vitor/wildfly-33.0.2.Final/bin/client/jboss-cli-client.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vitor/wildfly-33.0.2.Final/bin/client/jboss-client.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
