@@ -5,7 +5,6 @@ import java.util.List;
 import br.com.superdia.interfaces.IProduto;
 import br.com.superdia.modelo.Produto;
 import jakarta.ejb.Remote;
-import jakarta.ejb.Stateful;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

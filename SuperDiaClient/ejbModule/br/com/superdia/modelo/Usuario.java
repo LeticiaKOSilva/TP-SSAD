@@ -11,9 +11,12 @@ import jakarta.persistence.OneToOne;
 
 @Entity
 public class Usuario implements Serializable{
-
 	
 	private static final long serialVersionUID = 1L;
+	
+	public final static String PERFIL_ADMINISTRADOR = "admin",
+				PERFIL_CAIXA = "cashier",
+				PERFIL_CLIENTE = "client";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
