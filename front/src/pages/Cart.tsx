@@ -35,7 +35,7 @@ export default function Cart() {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
                     <img
-                      src={item.imageUrl}
+                      src={item.urlImagem}
                       alt={item.nome}
                       className="h-16 w-16 object-cover rounded"
                     />
@@ -103,7 +103,7 @@ export default function Cart() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img
-                          src={item.imageUrl}
+                          src={item.urlImagem}
                           alt={item.nome}
                           className="h-16 w-16 object-cover rounded"
                         />

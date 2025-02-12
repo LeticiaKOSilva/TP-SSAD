@@ -6,9 +6,9 @@ import useAuth from '../../context/useAuthContext';
 export default function Dashboard() {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({});
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   const lowStockProducts = products.filter(product => product.quantidadeEstoque <= product.estoqueMinimo);
 
@@ -24,8 +24,8 @@ export default function Dashboard() {
       setProducts(
         products.map((product) => ({
           ...product,
-          imageUrl:
-            product.imageUrl ||
+          urlImagem:
+            product.urlImagem ||
             DEFAULT_PRODUCT_IMAGE,
         })) as Product[]
       );
@@ -57,23 +57,35 @@ export default function Dashboard() {
     e.preventDefault();
     if (newProduct.nome && newProduct.preco && newProduct.quantidadeEstoque) {
       try {
-        const product = await createProduct(newProduct as Product);
-
-        setProducts([
-          ...products,
-          {
-            ...product,
-            imageUrl: product.imageUrl || 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800',
-          } as Product,
-        ]);
+        let product: Product;
+        if (editingProductId) {
+          product = await updateProduct(newProduct as Product);
+  
+          setProducts(
+            products.map((p) => (p.id === editingProductId ? product : p))
+          );
+        } else {
+          product = await createProduct(newProduct as Product);
+          setProducts([
+            ...products,
+            {
+              ...product,
+              urlImagem:
+                product.urlImagem ||
+                'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800',
+            } as Product,
+          ]);
+        }
+  
         setShowAddProduct(false);
         setNewProduct({});
+        setEditingProductId(null); // Reset editing ID after successful update/creation
       } catch (error) {
         console.error(error);
-        alert('Erro ao criar produto');
+        alert('Erro ao criar/atualizar produto');
       }
     }
-  };
+  };  
 
   const createProduct = async (product: Product) => {
     const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/produto/create', {
@@ -91,6 +103,30 @@ export default function Dashboard() {
 
     return await resp.json();
   }
+
+  const updateProduct = async (product: Product) => {
+    const resp = await fetch(
+      `http://localhost:8080/SuperDiaWebApi/rest/produto/update`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          login: user.pessoa.email,
+          senha: user.senha,
+          produto: product,
+        }),
+      }
+    );
+  
+    if (!resp.ok) {
+      const error = await resp.text();
+      throw new Error(error);
+    }
+  
+    return await resp.json();
+  };
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -152,7 +188,7 @@ export default function Dashboard() {
               <div key={product.id} className="p-4 border-b border-gray-200">
                 <div className="flex items-center">
                   <img
-                    src={product.imageUrl}
+                    src={product.urlImagem}
                     alt={product.nome}
                     className="h-10 w-10 rounded-full object-cover"
                   />
@@ -178,7 +214,13 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="mt-2">
-                  <button className="text-indigo-600 hover:text-indigo-900">
+                  <button className="text-indigo-600 hover:text-indigo-900"
+                    onClick={() => {
+                      setEditingProductId(product.id!);
+                      setNewProduct(product);
+                      setShowAddProduct(true);
+                    }}
+                  >
                     Editar
                   </button>
                 </div>
@@ -208,7 +250,7 @@ export default function Dashboard() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <img
-                        src={product.imageUrl}
+                        src={product.urlImagem}
                         alt={product.nome}
                         className="h-10 w-10 rounded-full object-cover"
                       />
@@ -237,7 +279,14 @@ export default function Dashboard() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button className="text-indigo-600 hover:text-indigo-900">
+                    <button
+                      className="text-indigo-600 hover:text-indigo-900"
+                      onClick={() => {
+                        setEditingProductId(product.id!);
+                        setNewProduct(product);
+                        setShowAddProduct(true);
+                      }}
+                    >
                       Editar
                     </button>
                   </td>
@@ -246,103 +295,129 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
-
-        {showAddProduct && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">
-                Novo Produto
-              </h3>
-              <form onSubmit={handleAddProduct} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nome
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newProduct.nome || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, nome: e.target.value })}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Descrição
-                  </label>
-                  <textarea
-                    value={newProduct.descricao || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, descricao: e.target.value })}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Preço
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={newProduct.preco || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, preco: parseFloat(e.target.value) })}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Quantidade em Estoque
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={newProduct.quantidadeEstoque || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, quantidadeEstoque: parseInt(e.target.value) })}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Estoque Mínimo
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={newProduct.estoqueMinimo || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, estoqueMinimo: parseInt(e.target.value) })}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    URL da Imagem
-                  </label>
-                  <input
-                    type="url"
-                    value={newProduct.imageUrl || ''}
-                    onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-                <div className="flex justify-end space-x-4 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddProduct(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-                  >
-                    Salvar
-                  </button>
-                </div>
-              </form>
+        {
+          showAddProduct && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-md w-full">
+                <h3 className="text-lg font-medium text-gray-900 mb-6">
+                  {editingProductId ? 'Editar Produto' : 'Novo Produto'}
+                </h3>
+                <form onSubmit={handleAddProduct} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Nome
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newProduct.nome || ''}
+                      onChange={(e) =>
+                        setNewProduct({ ...newProduct, nome: e.target.value })
+                      }
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Descrição
+                    </label>
+                    <textarea
+                      value={newProduct.descricao || ''}
+                      onChange={(e) =>
+                        setNewProduct({ ...newProduct, descricao: e.target.value })
+                      }
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Preço
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={newProduct.preco || ''}
+                      onChange={(e) =>
+                        setNewProduct({
+                          ...newProduct,
+                          preco: parseFloat(e.target.value),
+                        })
+                      }
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Quantidade em Estoque
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={newProduct.quantidadeEstoque || ''}
+                      onChange={(e) =>
+                        setNewProduct({
+                          ...newProduct,
+                          quantidadeEstoque: parseInt(e.target.value),
+                        })
+                      }
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Estoque Mínimo
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={newProduct.estoqueMinimo || ''}
+                      onChange={(e) =>
+                        setNewProduct({
+                          ...newProduct,
+                          estoqueMinimo: parseInt(e.target.value),
+                        })
+                      }
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      URL da Imagem
+                    </label>
+                    <input
+                      type="url"
+                      value={newProduct.urlImagem || ''}
+                      onChange={(e) =>
+                        setNewProduct({ ...newProduct, urlImagem: e.target.value })
+                      }
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddProduct(false);
+                        setEditingProductId(null);
+                        setNewProduct({});
+                      }}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                    >
+                      {editingProductId ? 'Atualizar' : 'Salvar'}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        }
       </div>
     </div>
   );

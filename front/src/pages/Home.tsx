@@ -15,8 +15,8 @@ export default function Home() {
       setProducts(
         products.map((product) => ({
           ...product,
-          imageUrl:
-            product.imageUrl ||
+          urlImagem:
+            product.urlImagem ||
             DEFAULT_PRODUCT_IMAGE,
         })) as Product[]
       );

@@ -12,7 +12,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <img
-        src={product.imageUrl}
+        src={product.urlImagem}
         alt={product.nome}
         className="w-full h-48 object-cover"
       />

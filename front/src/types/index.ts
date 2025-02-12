@@ -7,7 +7,7 @@ export interface Product {
   preco: number;
   estoqueMinimo: number;
   quantidadeEstoque: number;
-  imageUrl?: string;
+  urlImagem?: string;
 }
 
 export interface CartItem extends Product {
