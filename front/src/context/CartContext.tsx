@@ -28,7 +28,7 @@ export default function CartProvider({ children }: { children: ReactNode }) {
     if (quantity < 1) return;
     setItems(currentItems =>
       currentItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+        item.id === productId ? { ...item, quantidade: quantity } : item
       )
     );
   };
