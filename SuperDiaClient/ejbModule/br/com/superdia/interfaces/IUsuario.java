@@ -8,6 +8,6 @@ public interface IUsuario {
 	public void create(Usuario usuario);
 	public void update(Usuario usuario);
 	public void delete(Usuario usuario);
-	public Usuario authentication(String email,String senha);
+	public Usuario authentication(String email, String senha);
 	public List<Usuario>getUsuarios();
 }

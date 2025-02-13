@@ -115,7 +115,7 @@ public class ProdutoResource implements Serializable {
         	if(!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	
-            Produto produto = produtoService.getById(authRequest.produto.getId());
+            Produto produto = produtoService.getById(authRequest.getProduto().getId());
             return Response.ok(produto).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar produtos").build();

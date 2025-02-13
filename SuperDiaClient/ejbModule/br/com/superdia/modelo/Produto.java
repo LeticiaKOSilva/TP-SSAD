@@ -111,7 +111,7 @@ public class Produto implements Serializable {
         );
     }
 
-    private String formatarNome(String nome) {
+    public static String formatarNome(String nome) {
         if (nome.length() > 55) {
             return nome.substring(0, 52) + "...";
         }
