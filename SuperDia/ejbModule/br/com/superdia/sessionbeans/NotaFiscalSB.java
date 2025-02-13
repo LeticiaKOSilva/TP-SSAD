@@ -19,6 +19,7 @@ public class NotaFiscalSB implements INotaFiscal {
 	@Override
 	public void create(NotaFiscal notaFiscal) {
 		em.persist(notaFiscal);
+		em.flush();
 	}
 
 	@Override

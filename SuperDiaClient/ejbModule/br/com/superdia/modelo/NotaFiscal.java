@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,7 +28,7 @@ public class NotaFiscal implements Serializable {
     @ManyToOne
     private Usuario cliente;
     
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "notaFiscal")
     private List<Item> itens = new ArrayList<Item>();
     
     @Temporal(TemporalType.DATE)
@@ -77,6 +79,16 @@ public class NotaFiscal implements Serializable {
 	@Override
 	public String toString() {
 		return String.format("NotaFiscal [id=%s, cliente=%s, itens=%s, data=%s]", id, cliente, itens, data);
+	}
+	
+	public String toJson() {
+	    return String.format(
+	        "{\"id\":%d,\"cliente\":%s,\"itens\":[%s],\"data\":%d}",
+	        id,
+	        cliente != null ? cliente.toJson() : "null",
+	        itens.stream().map(Item::toJson).collect(Collectors.joining(",")),
+	        data != null ? data.getTimeInMillis() : 0
+	    );
 	}
 
 }

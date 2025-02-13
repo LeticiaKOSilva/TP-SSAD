@@ -19,6 +19,7 @@ public class ItemSB implements IItem {
 	@Override
 	public void create(Item item) {
 		em.persist(item);
+		em.flush();
 	}
 
 	@Override
