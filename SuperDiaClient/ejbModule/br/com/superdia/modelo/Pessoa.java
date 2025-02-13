@@ -24,6 +24,8 @@ public class Pessoa implements Serializable{
 	private String telefone;
 	private Date dataNascimento;
 	
+	public Pessoa() { }
+	
 	public Pessoa(String nome) {
 		super();
 		this.nome = nome;

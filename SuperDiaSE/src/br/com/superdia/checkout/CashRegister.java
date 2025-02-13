@@ -8,6 +8,7 @@ import java.util.Scanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.superdia.modelo.Item;
+import br.com.superdia.modelo.Pessoa;
 import br.com.superdia.modelo.Produto;
 import br.com.superdia.modelo.Usuario;
 import jakarta.ws.rs.client.Client;
@@ -66,7 +67,7 @@ public class CashRegister {
 
 	private void cartMenu(Scanner scanner) {
 		if(cart == null) {
-			System.out.println("\033[33m\n\nNão foi encontrado nenhum carrinho! Utilize a opção 1.\n\033[0m");
+			System.out.println("\033[33m\n\nNão foi encontrada nenhuma compra em aberto! Utilize a opção 1.\n\033[0m");
 			return;
 		}
 		
@@ -81,7 +82,7 @@ public class CashRegister {
             	case 2 -> removeProduct(scanner);
             	case 3 -> listCartItens();            	
             	case 4 -> listProducts();            	
-            	case 5 -> checkout();  
+            	case 5 -> checkout(scanner);  
             	case 6 -> { clearCart(); System.out.println("\033[33m\n\nCompra cancelada!\n\033[0m"); return; }
                 case 0 -> { return; } 
                 default -> System.err.println("\n\nOpção inválida!\n");
@@ -93,7 +94,7 @@ public class CashRegister {
 	    System.out.println("\n=== ADICIONAR PRODUTO ===");
 	    
 	    Produto product = fetchProduct(scanner);
-	    if (product == null) return;
+	    if (product == null) { System.out.println("\033[33m\n\nProduto não encontrado!\n\033[0m"); return; }
 	    
 	    int quantity = requestQuantity(scanner, product);
 	    if (quantity == 0) return;
@@ -159,6 +160,8 @@ public class CashRegister {
 	}
 
 	private void removeProduct(Scanner scanner) {
+		if(cart.size() == 0) { System.out.println("\033[33m\n\nCarinho vazio!\n\033[0m"); return; }
+		
 	    System.out.println("\n=== REMOVER PRODUTO ===");
 	    
 	    Produto product = fetchProduct(scanner);
@@ -199,10 +202,12 @@ public class CashRegister {
 		
 		System.out.println("\n=== ITENS DO CARRINHO ===");
 		cart.stream()
-	    .map(item -> String.format("%-20s Valor unitário: R$ %8.2f \t Quantidade: %d un.",
-	                               Produto.formatarNome(item.getProduto().getNome()), 
-	                               item.getValorUnitario(), item.getQuantidade()))
+	    .map(item -> String.format("ID: %6d    %-20s Valor unitário: R$ %8.2f \t Quantidade: %d un.",
+	    						item.getProduto().getId(), Produto.formatarNome(item.getProduto().getNome()), 
+	                            item.getValorUnitario(), item.getQuantidade()))
 	    .forEach(System.out::println);
+		
+		System.out.println("\nTotal: R$ " + String.format("%.2f", calculateTotalValue(cart)));
 	}
 
 	private void listProducts() {
@@ -230,26 +235,52 @@ public class CashRegister {
 	    listCartItens();
 
 	    double totalValue = calculateTotalValue(cart);
-	    System.out.println("\nTotal: R$ " + String.format("%.2f", totalValue));
-
-	    String email = requestEmail(scanner);
+	    
+	    Usuario cliente = null;
+	    while(cliente == null) { 
+	    	System.out.println("\nCliente não encontrado!\n");
+	    	fetchClient(scanner);
+	    }
 
 	    String paymentMethod = requestPaymentMethod(scanner);
+	    processPayment(scanner, totalValue, paymentMethod);
 
-	    finalizePurchase(email, totalValue, paymentMethod);
+	    finalizePurchase(cliente, totalValue, paymentMethod);
 	}
 
 	private double calculateTotalValue(List<Item> cart) {
 	    return cart.stream()
-	        .mapToDouble(item -> item.getValorUnitario() * item.getQuantidade())
+	        .mapToDouble(item -> item.getValorTotal())
 	        .sum();
+	}
+	
+	private Usuario fetchClient(Scanner scanner) {
+		Usuario usuario = new Usuario();
+		
+		usuario.setPessoa(new Pessoa(requestEmail(scanner)));
+	    
+	    Client client = ClientBuilder.newClient();
+	    Response response = client.target(BASE_URL + "produto/getByEmail")
+	            .request(MediaType.APPLICATION_JSON)
+	            .post(Entity.json(authJson(usuario)));
+	    
+	    if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+	    	usuario = response.readEntity(Usuario.class);
+	    } else {
+	        System.err.println("Erro: " + response.readEntity(String.class));
+	        usuario = null;
+	    }
+	    
+	    response.close();
+	    client.close();
+	    return usuario;
 	}
 
 	private String requestEmail(Scanner scanner) {
 	    String email;
+	    scanner.next();
 	    do {
-	        System.out.print("\nDigite o seu email: ");
-	        email = readString("\nE-mail do cliente: ", scanner);
+	        email = readString("\n\nE-mail do cliente: ", scanner);
 	    } while (!email.matches("^[\\w-]+(?:\\.[\\w-]+)*@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,7}$"));
 	    return email;
 	}
@@ -280,10 +311,42 @@ public class CashRegister {
 
 	    return paymentMethod;
 	}
+	
+	private void processPayment(Scanner scanner, double totalValue, String paymentMethod) {
+	    switch (paymentMethod) {
+	        case "Pix":
+	            System.out.println("\033[32m\nPagamento via PIX confirmado!\n\033[0m");
+	            break;
+	        case "Dinheiro":
+	            processCashPayment(scanner, totalValue);
+	            break;
+	        case "Cartão":
+	            processCardPayment();
+	            break;
+	    }
+	}
+	
+	private void processCashPayment(Scanner scanner, double totalValue) {
+	    double amountGiven;
+	    
+	    do {
+	        amountGiven = readDouble(String.format("\nValor total: R$ %.2f\nInforme o valor recebido: R$ ", totalValue), scanner);
+	        if (amountGiven < totalValue) {
+	            System.out.println("\033[31mValor insuficiente! Tente novamente.\033[0m");
+	        }
+	    } while (amountGiven < totalValue);
 
-	private void finalizePurchase(String email, double totalValue, String paymentMethod) {
+	    double change = amountGiven - totalValue;
+	    System.out.printf("\033[32mTroco: R$ %.2f\n\033[0m", change);
+	}
+
+	private void processCardPayment() {
+	    System.out.println("\nProcessando pagamento no cartão...");
+	}
+
+	private void finalizePurchase(Usuario client, double totalValue, String paymentMethod) {
 	    System.out.println("\n=== FINALIZANDO A COMPRA ===");
-	    System.out.println("Email do cliente: " + email);
+	    System.out.println("Email do cliente: " + client.getPessoa().getEmail());
 	    System.out.println("Total: R$ " + String.format("%.2f", totalValue));
 	    System.out.println("Forma de pagamento escolhida: " + paymentMethod);
 	    System.out.println("Compra finalizada com sucesso!");
@@ -390,6 +453,10 @@ public class CashRegister {
 
     private String authJson(Produto produto) {
         return "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\",\"produto\":" + produto.toJson() + "}";
+    }
+    
+    private String authJson(Usuario usuario) {
+        return "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\",\"usuario\":" + usuario.toJson() + "}";
     }
 
     private static String readString(String message, Scanner scanner) {
