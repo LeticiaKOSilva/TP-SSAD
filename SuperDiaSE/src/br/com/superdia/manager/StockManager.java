@@ -2,16 +2,18 @@ package br.com.superdia.manager;
 
 import java.util.List;
 import java.util.Scanner;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import br.com.superdia.modelo.Produto;
+import br.com.superdia.soap.CreditCardValidatorService;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import br.com.superdia.modelo.Produto;
-import br.com.superdia.soap.CreditCardValidatorService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class StockManager {
     private static final String BASE_URL = "http://localhost:8080/SuperDiaWebApi/rest/";
@@ -55,11 +57,12 @@ public class StockManager {
         System.out.println("\n=== ADICIONAR PRODUTO ===");
         String nome = readString("Nome do Produto: ", scanner);
         String descricao = readString("Descrição: ", scanner);
+        String urlImagem = readString("Url: ", scanner);
         double preco = readDouble("Preço: ", scanner);
         int estoqueMinimo = readInt("Estoque Mínimo: ", scanner);
         int quantidadeEstoque = readInt("Quantidade em Estoque: ", scanner);
 
-        Produto produto = new Produto(nome, descricao, preco, estoqueMinimo, quantidadeEstoque);
+        Produto produto = new Produto(nome, descricao, preco, estoqueMinimo, quantidadeEstoque, "SuperDIA", urlImagem);
         sendPostRequest("produto/create", produto, "Produto cadastrado com sucesso!");
     }
 
@@ -68,11 +71,13 @@ public class StockManager {
         Long id = Long.valueOf(readInt("ID do Produto a atualizar: ", scanner));
         String nome = readString("Novo Nome: ", scanner);
         String descricao = readString("Nova Descrição: ", scanner);
+        String urlImagem = readString("Nova Url: ", scanner);
+        String vendidorPor = readString("Vendidor por: ", scanner);
         double preco = readDouble("Novo Preço: ", scanner);
         int estoqueMinimo = readInt("Novo Estoque Mínimo: ", scanner);
         int quantidadeEstoque = readInt("Nova Quantidade em Estoque: ", scanner);
 
-        Produto produto = new Produto(id, nome, descricao, preco, estoqueMinimo, quantidadeEstoque);
+        Produto produto = new Produto(id, nome, descricao, preco, estoqueMinimo, quantidadeEstoque, vendidorPor, urlImagem);
         sendPutRequest("produto/update", produto, "Produto atualizado com sucesso!");
     }
 
@@ -133,21 +138,31 @@ public class StockManager {
                 JsonNode rootNode = mapper.readTree(jsonResponse);
 
                 if (apiUrl.equals(RED_BULL_API)) {
-                    // Parse Red Bull Shop products
                     for (JsonNode productNode : rootNode.path("products")) {
                         String nome = productNode.path("title").asText();
                         String descricao = productNode.path("handle").asText();
                         double preco = productNode.path("variants").get(0).path("price").asDouble();
-                        Produto produto = new Produto(nome, descricao, preco, 10, 100); // Default values for estoqueMinimo and quantidadeEstoque
+                        
+                        String imageUrl = "";
+                        if (productNode.path("images").size() > 0) {
+                            imageUrl = productNode.path("images").get(0).path("src").asText();
+                        }
+
+                        Produto produto = new Produto(nome, descricao, preco, 10, 100, "Redbull", imageUrl);
                         sendPostRequest("produto/create", produto, "Produto cadastrado com sucesso: " + nome);
                     }
                 } else if (apiUrl.equals(KYLIE_COSMETICS_API)) {
-                    // Parse Kylie Cosmetics products
                     for (JsonNode productNode : rootNode.path("products")) {
                         String nome = productNode.path("title").asText();
                         String descricao = productNode.path("handle").asText();
                         double preco = productNode.path("variants").get(0).path("price").asDouble();
-                        Produto produto = new Produto(nome, descricao, preco, 10, 100); // Default values for estoqueMinimo and quantidadeEstoque
+                        
+                        String imageUrl = "";
+                        if (productNode.path("images").size() > 0) {
+                            imageUrl = productNode.path("images").get(0).path("src").asText();
+                        }
+
+                        Produto produto = new Produto(nome, descricao, preco, 10, 100, "Kylie Cosmetics", imageUrl);
                         sendPostRequest("produto/create", produto, "Produto cadastrado com sucesso: " + nome);
                     }
                 }

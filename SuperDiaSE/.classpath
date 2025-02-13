@@ -8,6 +8,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-22">
 		<attributes>
+			<attribute name="module" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
@@ -17,14 +18,14 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/SuperDiaClient"/>
-	<classpathentry kind="lib" path="C:/Users/vinic/OneDrive/Documentos/Curso/TSI/Sexto_Periodo/Servicos_de_Suporte_a_Aplicacoes_Distribuidas/TP/hibernate-core-6.4.4.Final.jar"/>
-	<classpathentry kind="lib" path="D:/Wildfly/wildfly-33.0.2.Final/bin/client/jboss-cli-client.jar"/>
-	<classpathentry kind="lib" path="D:/Wildfly/wildfly-33.0.2.Final/bin/client/jboss-client.jar"/>
 	<classpathentry kind="src" output="target/classes" path="target/generated-sources/wsimport">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Yury/Documents/GitHub/TP-SSAD/DesktopDependencies/hibernate-core-6.4.4.Final.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Yury/Documents/GitHub/TP-SSAD/DesktopDependencies/jboss-cli-client.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Yury/Documents/GitHub/TP-SSAD/DesktopDependencies/jboss-client.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
