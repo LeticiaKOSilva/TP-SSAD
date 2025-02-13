@@ -40,7 +40,7 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/SuperDiaClient"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SuperDia"/>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.jboss.ide.eclipse.as.core.server.runtime.runtimeTarget/WildFly 33.0 Runtime">
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.jboss.ide.eclipse.as.core.server.runtime.runtimeTarget/WildFly 27.0 Runtime">
 		<attributes>
 			<attribute name="owner.project.facets" value="jst.web"/>
 		</attributes>
