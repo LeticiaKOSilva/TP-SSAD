@@ -7,6 +7,7 @@ import br.com.superdia.modelo.Item;
 import jakarta.ejb.Remote;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 
@@ -17,8 +18,10 @@ public class ItemSB implements IItem {
 	private EntityManager em;
 	
 	@Override
-	public void create(Item item) {
+	public Item create(Item item) {
 		em.persist(item);
+		em.flush();
+		return item;
 	}
 
 	@Override
@@ -37,4 +40,16 @@ public class ItemSB implements IItem {
 		return itens.getResultList();
 	}
 
+	@Override
+	public Item getItemById(Long id) {
+	    TypedQuery<Item> query = em.createQuery(
+		        "SELECT i FROM Item i WHERE i.id = :id", Item.class);
+		    query.setParameter("id", id);
+		    
+		    try {
+		        return query.getSingleResult();
+		    } catch (NoResultException e) {
+		        return null;
+		    }
+	}
 }

@@ -7,8 +7,9 @@ import jakarta.ejb.Remote;
 
 @Remote
 public interface IItem {
-	public void create(Item item);
+	public Item create(Item item);
 	public void delete(Item item);
 	public void update(Item item);
 	public List<Item>getProdutos();
+	public Item getItemById(Long id);
 }

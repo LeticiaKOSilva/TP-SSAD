@@ -1,6 +1,8 @@
 package br.com.superdia.api;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 import br.com.superdia.interfaces.IItem;
@@ -38,12 +40,10 @@ public class ItemResource implements Serializable {
     @Path("/create")
     public Response create(AuthRequest authRequest) {
         try {
-            if (!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Acesso Negado! Autenticação necessária").build();
-            
             Item item = authRequest.getItem();
-            itemService.create(item);
-            return Response.status(Response.Status.CREATED).entity(item).build();
+            Item createdItem = itemService.create(item);
+            
+            return Response.status(Response.Status.CREATED).entity(createdItem).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao criar item").build();
         }
@@ -53,12 +53,13 @@ public class ItemResource implements Serializable {
     @Path("/update")
     public Response update(AuthRequest authRequest) {
         try {
-            if (!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Acesso Negado! Autenticação necessária").build();
-            
             Item item = authRequest.getItem();
-            itemService.update(item);
-            return Response.ok(item).build();
+            Item itemBanco = itemService.getItemById(item.getId());
+            
+            merge(item, itemBanco);
+            
+            itemService.update(itemBanco);
+            return Response.ok(itemBanco).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar item").build();
         }
@@ -106,5 +107,29 @@ public class ItemResource implements Serializable {
 
         public Item getItem() { return item; }
         public void setItem(Item item) { this.item = item; }
+    }
+    
+    public static <T> void merge(T source, T target) throws IllegalAccessException {
+        if (source == null || target == null) {
+            throw new IllegalArgumentException("Source and target objects cannot be null");
+        }
+
+        Class<?> clazz = source.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            if (Modifier.isFinal(field.getModifiers())) {
+                continue;
+            }
+            
+            field.setAccessible(true);
+            Object sourceValue = field.get(source);
+            if (sourceValue != null) {
+                field.set(target, sourceValue);
+            }
+        }
     }
 }
