@@ -11,6 +11,7 @@ import br.com.superdia.modelo.Item;
 import br.com.superdia.modelo.Pessoa;
 import br.com.superdia.modelo.Produto;
 import br.com.superdia.modelo.Usuario;
+import br.com.superdia.soap.CreditCardValidatorService;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -24,7 +25,10 @@ public class CashRegister {
 	
 	private static final int AUTH_SUCCESS = 1,
 			AUTH_FAILURE = 0,
-			AUTH_ERROR = -1;
+			AUTH_ERROR = -1,
+			PAYMENT_PIX = 2,
+			PAYMENT_CARD = 1,
+			PAYMENT_CASH = 0;
 	
 	private Usuario cashier;
 	private List<Item> cart;
@@ -242,10 +246,10 @@ public class CashRegister {
 	    	fetchClient(scanner);
 	    }
 
-	    String paymentMethod = requestPaymentMethod(scanner);
+	    int paymentMethod = requestPaymentMethod(scanner);
 	    processPayment(scanner, totalValue, paymentMethod);
 
-	    finalizePurchase(cliente, totalValue, paymentMethod);
+	    finalizePurchase(cliente, totalValue);
 	}
 
 	private double calculateTotalValue(List<Item> cart) {
@@ -285,43 +289,28 @@ public class CashRegister {
 	    return email;
 	}
 
-	private String requestPaymentMethod(Scanner scanner) {
-	    String paymentMethod = "";
-	    boolean validChoice;
-
+	private int requestPaymentMethod(Scanner scanner) {
 	    do {
-	        String choice = readString(String.format("\nEscolha a forma de pagamento:\n1. Cartão\n2. Pix\n3. Dinheiro\nOpção: "), scanner);
-	        
-	        validChoice = true;
+	        int choice = readInt(String.format("\nEscolha a forma de pagamento:\n1. Cartão\n2. Pix\n3. Dinheiro\nOpção: "), scanner);
 	        switch (choice) {
-	            case "1":
-	                paymentMethod = "Cartão";
-	                break;
-	            case "2":
-	                paymentMethod = "Pix";
-	                break;
-	            case "3":
-	                paymentMethod = "Dinheiro";
-	                break;
-	            default:
-	                System.out.println("Opção inválida! Tente novamente.");
-	                validChoice = false;
+	            case 1: return PAYMENT_CARD;
+	            case 2: return PAYMENT_PIX;
+	            case 3: return PAYMENT_CASH;
 	        }
-	    } while (!validChoice);
-
-	    return paymentMethod;
+	        System.out.println("\nOpção inválida! Tente novamente.");
+	    } while (true);
 	}
 	
-	private void processPayment(Scanner scanner, double totalValue, String paymentMethod) {
+	private void processPayment(Scanner scanner, double totalValue, int paymentMethod) {
 	    switch (paymentMethod) {
-	        case "Pix":
+	        case PAYMENT_PIX:
 	            System.out.println("\033[32m\nPagamento via PIX confirmado!\n\033[0m");
 	            break;
-	        case "Dinheiro":
+	        case PAYMENT_CARD:
 	            processCashPayment(scanner, totalValue);
 	            break;
-	        case "Cartão":
-	            processCardPayment();
+	        case PAYMENT_CASH:
+	            processCardPayment(scanner);
 	            break;
 	    }
 	}
@@ -340,15 +329,30 @@ public class CashRegister {
 	    System.out.printf("\033[32mTroco: R$ %.2f\n\033[0m", change);
 	}
 
-	private void processCardPayment() {
-	    System.out.println("\nProcessando pagamento no cartão...");
+	private void processCardPayment(Scanner scanner) {
+		boolean isValid;
+	    do {
+	        String cardNumber = readString("Número do Cartão: ", scanner);
+	        String expiryDate = readString("Data de Validade (MM/YY): ", scanner);
+
+	        cardNumber = cardNumber.replaceAll("\\s+", "").trim();
+	        expiryDate = expiryDate.replace("/", "").trim();
+
+	        CreditCardValidatorService validator = new CreditCardValidatorService();
+	        isValid = validator.validateCard(cardNumber, expiryDate);
+
+	        if (!isValid) {
+	            System.err.println("Cartão de crédito inválido. Tente novamente.");
+	        }
+	    } while (!isValid);
+	    
+	    System.out.println("\033[32mPagamento via cartão confirmado!\n\033[0m");
 	}
 
-	private void finalizePurchase(Usuario client, double totalValue, String paymentMethod) {
+	private void finalizePurchase(Usuario client, double totalValue) {
 	    System.out.println("\n=== FINALIZANDO A COMPRA ===");
 	    System.out.println("Email do cliente: " + client.getPessoa().getEmail());
 	    System.out.println("Total: R$ " + String.format("%.2f", totalValue));
-	    System.out.println("Forma de pagamento escolhida: " + paymentMethod);
 	    System.out.println("Compra finalizada com sucesso!");
 	}
 
@@ -407,7 +411,7 @@ public class CashRegister {
             }
             return AUTH_SUCCESS;
         } else {
-            System.err.println("\nErro: " + responseBody);
+            System.err.println("\nOcorreu um erro durante a autenticação! Verifique a API.");
             return AUTH_ERROR;
         }
     }
