@@ -101,7 +101,7 @@ public class UsuarioResource implements Serializable {
     public Response authenticate(AuthRequest authRequest) {
         try {
             Usuario usuario = usuarioService.authentication(authRequest.getLogin(), authRequest.getSenha());
-
+            
             if (usuario != null) {
                 return Response.ok(usuario).build();
             } else {
@@ -121,6 +121,7 @@ public class UsuarioResource implements Serializable {
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	
         	Usuario usuario = usuarioService.getByEmail(authRequest.getUsuario().getPessoa().getEmail());
+        	
             return Response.ok(usuario).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar usuarios").build();
