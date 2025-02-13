@@ -3,6 +3,7 @@ package br.com.superdia.sessionbeans;
 import java.util.List;
 
 import br.com.superdia.interfaces.IUsuario;
+import br.com.superdia.modelo.Produto;
 import br.com.superdia.modelo.Usuario;
 import jakarta.ejb.Remote;
 import jakarta.ejb.Stateful;
@@ -49,6 +50,17 @@ public class UsuarioSB implements IUsuario {
 	    List<Usuario> resultList = query.getResultList();
 	    
 	    return resultList.isEmpty() ? null : resultList.get(0);
+	}
+
+	@Override
+	public Usuario getByEmail(String email) {
+		TypedQuery<Usuario> query = em.createQuery(
+				"SELECT u FROM Usuario u INNER JOIN u.pessoa p WHERE p.email = :email", Usuario.class);
+		query.setParameter("email", email);
+
+		List<Usuario> resultList = query.getResultList();
+
+		return resultList.isEmpty() ? null : resultList.get(0);
 	}
 
 }

@@ -10,4 +10,5 @@ public interface IUsuario {
 	public void delete(Usuario usuario);
 	public Usuario authentication(String email, String senha);
 	public List<Usuario>getUsuarios();
+	public Usuario getByEmail(String email);
 }

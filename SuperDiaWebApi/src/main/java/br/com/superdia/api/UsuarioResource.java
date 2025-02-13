@@ -33,6 +33,10 @@ public class UsuarioResource implements Serializable {
 		return "";
 	}
 	
+    public boolean isAuthenticated(String login, String senha) {
+        return usuarioService.authentication(login, senha) != null;
+    }
+	
     @POST
     @Path("/create")
     public Response create(AuthRequest authRequest) {
@@ -106,6 +110,20 @@ public class UsuarioResource implements Serializable {
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro na autenticação").build();
+        }
+    }
+    
+    @POST
+    @Path("/getByEmail")
+    public Response getById(AuthRequest authRequest) {
+        try {
+        	if(!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
+        		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
+        	
+        	Usuario usuario = usuarioService.getByEmail(authRequest.getUsuario().getPessoa().getEmail());
+            return Response.ok(usuario).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao buscar usuarios").build();
         }
     }
 
