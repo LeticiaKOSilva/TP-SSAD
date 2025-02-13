@@ -7,10 +7,15 @@ import useCart from '../context/useCartContext';
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { user, logout } = useAuth(); // Adicionamos a função logout do contexto
+  const { user, logout } = useAuth();
   const { items } = useCart();
 
   const totalItems = items.reduce((sum, item) => sum + item.quantidade, 0);
+
+  const handleLogout = () => {
+    setIsDropdownOpen(false);
+    logout();
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
@@ -140,7 +145,7 @@ export default function Header() {
                   </Link>
                 )}
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600"
                 >
                   Sair
