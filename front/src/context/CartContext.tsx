@@ -37,9 +37,13 @@ export default function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
+  const setCart = (cartItems: CartItem[]) => {
+    setItems(cartItems);
+  };
+
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart }}
+      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, setCart }}
     >
       {children}
     </CartContext.Provider>

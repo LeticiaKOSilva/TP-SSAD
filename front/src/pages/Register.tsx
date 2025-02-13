@@ -60,7 +60,7 @@ export default function Register() {
   };
 
   const createPessoa = async (pessoa: Person) => {
-    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/pessoa/create', {
+    const resp = await fetch('/api/pessoa/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export default function Register() {
   }
 
   const createUsuario = async (usuario) => {
-    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/usuario/create', {
+    const resp = await fetch('/api/usuario/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
