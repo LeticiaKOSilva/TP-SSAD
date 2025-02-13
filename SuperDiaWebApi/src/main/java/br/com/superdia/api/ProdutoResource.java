@@ -62,8 +62,6 @@ public class ProdutoResource implements Serializable {
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	Produto produto = authRequest.getProduto();
         	
-        	System.out.println("\n\n\n\nPRODUTO ----------- " + produto + "\n\n\n");
-        	
             produtoService.update(produto);
             return Response.ok(produto).build();
         } catch (Exception e) {
