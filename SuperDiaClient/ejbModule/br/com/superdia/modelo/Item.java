@@ -77,5 +77,9 @@ public class Item implements Serializable {
 		return String.format("Item [id=%s, produto=%s, quantidade=%s, valorUnitario=%s]", id, produto, quantidade,
 				valorUnitario);
 	}
+	
+	public Double getValorTotal() {
+		return quantidade * valorUnitario;
+	}
 
 }
