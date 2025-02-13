@@ -2,6 +2,7 @@ package br.com.superdia.checkout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +66,7 @@ public class CashRegister {
 
 	private void cartMenu(Scanner scanner) {
 		if(cart == null) {
-			System.out.println("\n\nNão foi encontrado nenhum carrinho! Utilize a opção 1.");
+			System.out.println("\033[33m\n\nNão foi encontrado nenhum carrinho! Utilize a opção 1.\n\033[0m");
 			return;
 		}
 		
@@ -76,23 +77,132 @@ public class CashRegister {
             scanner.nextLine();
 
             switch (option) {
-            	case 1 -> addProduct();
-            	case 2 -> removeProduct();
-            	case 3 -> listProducts();            	
-            	case 4 -> checkout();  
-            	case 5 -> { clearCart(); return; }
+            	case 1 -> addProduct(scanner);
+            	case 2 -> removeProduct(scanner);
+            	case 3 -> listCartItens();            	
+            	case 4 -> listProducts();            	
+            	case 5 -> checkout();  
+            	case 6 -> { clearCart(); System.out.println("\033[33m\n\nCompra cancelada!\n\033[0m"); return; }
                 case 0 -> { return; } 
                 default -> System.err.println("\n\nOpção inválida!\n");
             }
         } while (option != 0);
 	}
 
-	private void addProduct() {
-		// TODO Auto-generated method stub
+	private void addProduct(Scanner scanner) {
+	    System.out.println("\n=== ADICIONAR PRODUTO ===");
+	    
+	    Produto product = fetchProduct(scanner);
+	    if (product == null) return;
+	    
+	    int quantity = requestQuantity(scanner, product);
+	    if (quantity == 0) return;
+	    
+	    addOrUpdateCartItem(cart, product, quantity);
+	}
+	
+	private Produto fetchProduct(Scanner scanner) {
+		Produto product = new Produto();
+	    product.setId(Long.valueOf(readInt("ID do Produto: ", scanner)));
+	    
+	    Client client = ClientBuilder.newClient();
+	    Response response = client.target(BASE_URL + "produto/getById")
+	            .request(MediaType.APPLICATION_JSON)
+	            .post(Entity.json(authJson(product)));
+	    
+	    if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+	        product = response.readEntity(Produto.class);
+	    } else {
+	        System.err.println("Erro: " + response.readEntity(String.class));
+	        product = null;
+	    }
+	    
+	    response.close();
+	    client.close();
+	    return product;
+	}
+	
+	private int requestQuantity(Scanner scanner, Produto product) {
+	    int quantity;
+	    do {
+	        quantity = readInt(String.format("Quantity (%d in stock) [0 - Cancel]: ", product.getQuantidadeEstoque()), scanner);
+	        if (quantity == 0) return 0;
+	    } while (quantity < 0 || quantity > product.getQuantidadeEstoque());
+	    
+	    return quantity;
+	}
+	
+	private void addOrUpdateCartItem(List<Item> cart, Produto product, int quantity) {
+	    Optional<Item> existingItem = cart.stream()
+	        .filter(i -> i.getProduto().getId().equals(product.getId()))
+	        .findFirst();
+	    
+	    if (existingItem.isPresent()) {
+	        Item item = existingItem.get();
+	        int newQuantity = item.getQuantidade() + quantity;
+	        
+	        if (newQuantity > product.getQuantidadeEstoque()) {
+	            System.out.println("\033[31mQuantidade em estoque é insuficiente!\033[0m");
+	        } else {
+	            item.setQuantidade(newQuantity);
+	            System.out.println("\033[33m\n\nQuantidade atualizada!\n\033[0m");
+	        }
+	    } else {
+	        Item item = new Item();
+	        item.setProduto(product);
+	        item.setValorUnitario(product.getPreco());
+	        item.setQuantidade(quantity);
+	        cart.add(item);
+	        
+	        System.out.println("\033[32m\n\nItem adicionado ao carrinho!\n\033[0m");
+	    }
 	}
 
-	private void removeProduct() {
-		// TODO Auto-generated method stub
+	private void removeProduct(Scanner scanner) {
+	    System.out.println("\n=== REMOVER PRODUTO ===");
+	    
+	    Produto product = fetchProduct(scanner);
+	    if (product == null) return;
+
+	    Optional<Item> existingItem = cart.stream()
+	        .filter(i -> i.getProduto().getId().equals(product.getId()))
+	        .findFirst();
+	    
+	    if (existingItem.isPresent()) {
+	        Item item = existingItem.get();
+	        int availableQuantity = item.getQuantidade();
+	        
+	        int quantityToRemove = readInt(String.format("Quantidade a remover (máximo %d disponível no carrinho): ", availableQuantity), scanner);
+	        
+	        if (quantityToRemove <= 0) {
+	            System.out.println("\033[31mErro: A quantidade deve ser maior que zero.\033[0m");
+	            return;
+	        }
+	        
+	        if (quantityToRemove > availableQuantity) {
+	            System.out.println(String.format("\033[31m\n\nNão é possível remover mais do que a quantidade disponível (%d).\033[0m", availableQuantity));
+	        } else if (quantityToRemove == availableQuantity) {
+	            cart.remove(item);
+	            System.out.println("\033[32mProduto removido do carrinho!\033[0m");
+	        } else {
+	            item.setQuantidade(availableQuantity - quantityToRemove);
+	            System.out.println(String.format("\033[33m\n\nQuantidade do produto no carrinho atualizada para %d!\033[0m", item.getQuantidade()));
+	        }
+	    } else {
+	        System.out.println("\033[33m\n\nProduto não encontrado no carrinho.\n\033[0m");
+	    }
+	}
+
+	
+	private void listCartItens() {
+		if(cart.size() == 0) { System.out.println("\033[33m\n\nCarinho vazio!\n\033[0m"); return; }
+		
+		System.out.println("\n=== ITENS DO CARRINHO ===");
+		cart.stream()
+	    .map(item -> String.format("%-20s Valor unitário: R$ %8.2f \t Quantidade: %d un.",
+	                               Produto.formatarNome(item.getProduto().getNome()), 
+	                               item.getValorUnitario(), item.getQuantidade()))
+	    .forEach(System.out::println);
 	}
 
 	private void listProducts() {
@@ -114,9 +224,71 @@ public class CashRegister {
         client.close();
 	}
 
-	private void checkout() {
-		// TODO Auto-generated method stub
+	private void checkout(Scanner scanner) {
+		if(cart.size() == 0) { System.out.println("\033[33m\n\nCarinho vazio!\n\033[0m"); return; }
+		
+	    listCartItens();
+
+	    double totalValue = calculateTotalValue(cart);
+	    System.out.println("\nTotal: R$ " + String.format("%.2f", totalValue));
+
+	    String email = requestEmail(scanner);
+
+	    String paymentMethod = requestPaymentMethod(scanner);
+
+	    finalizePurchase(email, totalValue, paymentMethod);
 	}
+
+	private double calculateTotalValue(List<Item> cart) {
+	    return cart.stream()
+	        .mapToDouble(item -> item.getValorUnitario() * item.getQuantidade())
+	        .sum();
+	}
+
+	private String requestEmail(Scanner scanner) {
+	    String email;
+	    do {
+	        System.out.print("\nDigite o seu email: ");
+	        email = readString("\nE-mail do cliente: ", scanner);
+	    } while (!email.matches("^[\\w-]+(?:\\.[\\w-]+)*@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,7}$"));
+	    return email;
+	}
+
+	private String requestPaymentMethod(Scanner scanner) {
+	    String paymentMethod = "";
+	    boolean validChoice;
+
+	    do {
+	        String choice = readString(String.format("\nEscolha a forma de pagamento:\n1. Cartão\n2. Pix\n3. Dinheiro\nOpção: "), scanner);
+	        
+	        validChoice = true;
+	        switch (choice) {
+	            case "1":
+	                paymentMethod = "Cartão";
+	                break;
+	            case "2":
+	                paymentMethod = "Pix";
+	                break;
+	            case "3":
+	                paymentMethod = "Dinheiro";
+	                break;
+	            default:
+	                System.out.println("Opção inválida! Tente novamente.");
+	                validChoice = false;
+	        }
+	    } while (!validChoice);
+
+	    return paymentMethod;
+	}
+
+	private void finalizePurchase(String email, double totalValue, String paymentMethod) {
+	    System.out.println("\n=== FINALIZANDO A COMPRA ===");
+	    System.out.println("Email do cliente: " + email);
+	    System.out.println("Total: R$ " + String.format("%.2f", totalValue));
+	    System.out.println("Forma de pagamento escolhida: " + paymentMethod);
+	    System.out.println("Compra finalizada com sucesso!");
+	}
+
 	
 	private void clearCart() {
 		cart = null;
@@ -149,7 +321,7 @@ public class CashRegister {
                     .request(MediaType.APPLICATION_JSON)
                     .post(Entity.json(json));
         } catch (Exception e) {
-        	System.err.println("\nNão foi possível se conectar ao servidor!");
+        	System.err.println("\nNão foi possível se conectar ao servidor! Finalizando...");
         	return AUTH_ERROR;
 		}
 
@@ -189,12 +361,13 @@ public class CashRegister {
     
     private static void displayCartMenuOptions() {
     	System.out.print(String.format(
-    		    "\n=== CARRINHO ===\n" +
+    		    "\n=== COMPRA ===\n" +
     		    "1. Adicionar Produto\n" +
     		    "2. Remover Produto\n" +
-    		    "3. Listar Produtos\n" +
-    		    "4. Finalizar Compra\n" +
-    		    "5. Cancelar Compra\n" +
+    		    "3. Ver carrinho\n" +
+    		    "4. Listar Produtos\n" +
+    		    "5. Finalizar Compra\n" +
+    		    "6. Cancelar Compra\n" +
     		    "0. Voltar\n" +
     		    "Escolha uma opção: "
     		));
@@ -216,9 +389,7 @@ public class CashRegister {
     }
 
     private String authJson(Produto produto) {
-        String json = "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\",\"produto\":" + produto.toJson() + "}";
-        System.out.println("JSON Enviado: " + json);
-        return json;
+        return "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\",\"produto\":" + produto.toJson() + "}";
     }
 
     private static String readString(String message, Scanner scanner) {
