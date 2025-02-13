@@ -31,6 +31,12 @@ public class Pessoa implements Serializable{
 		this.nome = nome;
 	}
 
+	public Pessoa(String nome, String email) {
+		super();
+		this.nome = nome;
+		this.email = email;
+	}
+
 	public Long getId() {
 		return id;
 	}

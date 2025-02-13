@@ -8,9 +8,14 @@
 	<classpathentry kind="src" path="ejbModule"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.jboss.ide.eclipse.as.core.server.runtime.runtimeTarget/WildFly 27.0 Runtime">
 		<attributes>
-			<attribute name="owner.project.facets" value="jst.jaxrs;jst.ejb;jpt.jpa"/>
+			<attribute name="owner.project.facets" value="jst.jaxrs"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.jboss.ide.eclipse.as.core.server.runtime.runtimeTarget/WildFly 33.0 Runtime">
+		<attributes>
+			<attribute name="owner.project.facets" value="jst.ejb;jpt.jpa"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

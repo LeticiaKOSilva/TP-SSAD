@@ -1,6 +1,7 @@
 package br.com.superdia.checkout;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -8,6 +9,7 @@ import java.util.Scanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.superdia.modelo.Item;
+import br.com.superdia.modelo.NotaFiscal;
 import br.com.superdia.modelo.Pessoa;
 import br.com.superdia.modelo.Produto;
 import br.com.superdia.modelo.Usuario;
@@ -86,7 +88,7 @@ public class CashRegister {
             	case 2 -> removeProduct(scanner);
             	case 3 -> listCartItens();            	
             	case 4 -> listProducts();            	
-            	case 5 -> checkout(scanner);  
+            	case 5 -> { checkout(scanner); return; } 
             	case 6 -> { clearCart(); System.out.println("\033[33m\n\nCompra cancelada!\n\033[0m"); return; }
                 case 0 -> { return; } 
                 default -> System.err.println("\n\nOpção inválida!\n");
@@ -130,7 +132,7 @@ public class CashRegister {
 	private int requestQuantity(Scanner scanner, Produto product) {
 	    int quantity;
 	    do {
-	        quantity = readInt(String.format("Quantity (%d in stock) [0 - Cancel]: ", product.getQuantidadeEstoque()), scanner);
+	        quantity = readInt(String.format("Quantidade (%d em estoque) [0 - Cancelar]: ", product.getQuantidadeEstoque()), scanner);
 	        if (quantity == 0) return 0;
 	    } while (quantity < 0 || quantity > product.getQuantidadeEstoque());
 	    
@@ -240,16 +242,15 @@ public class CashRegister {
 
 	    double totalValue = calculateTotalValue(cart);
 	    
-	    Usuario cliente = null;
-	    while(cliente == null) { 
-	    	System.out.println("\nCliente não encontrado!\n");
-	    	fetchClient(scanner);
-	    }
+	    Usuario cliente;
+	    while((cliente = fetchClient(scanner)) == null);
 
 	    int paymentMethod = requestPaymentMethod(scanner);
 	    processPayment(scanner, totalValue, paymentMethod);
 
 	    finalizePurchase(cliente, totalValue);
+	    
+	    clearCart();
 	}
 
 	private double calculateTotalValue(List<Item> cart) {
@@ -261,19 +262,15 @@ public class CashRegister {
 	private Usuario fetchClient(Scanner scanner) {
 		Usuario usuario = new Usuario();
 		
-		usuario.setPessoa(new Pessoa(requestEmail(scanner)));
+		usuario.setPessoa(new Pessoa("", requestEmail(scanner)));
 	    
 	    Client client = ClientBuilder.newClient();
-	    Response response = client.target(BASE_URL + "produto/getByEmail")
+	    Response response = client.target(BASE_URL + "usuario/getByEmail")
 	            .request(MediaType.APPLICATION_JSON)
 	            .post(Entity.json(authJson(usuario)));
 	    
-	    if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-	    	usuario = response.readEntity(Usuario.class);
-	    } else {
-	        System.err.println("Erro: " + response.readEntity(String.class));
-	        usuario = null;
-	    }
+	    usuario = (response.getStatus() == Response.Status.OK.getStatusCode()) ? response.readEntity(Usuario.class) : null;
+	    if(usuario == null) System.out.print("\nCliente não encontrado!");
 	    
 	    response.close();
 	    client.close();
@@ -282,9 +279,9 @@ public class CashRegister {
 
 	private String requestEmail(Scanner scanner) {
 	    String email;
-	    scanner.next();
+	    
 	    do {
-	        email = readString("\n\nE-mail do cliente: ", scanner);
+	        email = readString("\nE-mail do cliente: ", scanner);
 	    } while (!email.matches("^[\\w-]+(?:\\.[\\w-]+)*@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,7}$"));
 	    return email;
 	}
@@ -307,10 +304,10 @@ public class CashRegister {
 	            System.out.println("\033[32m\nPagamento via PIX confirmado!\n\033[0m");
 	            break;
 	        case PAYMENT_CARD:
-	            processCashPayment(scanner, totalValue);
+	        	processCardPayment(scanner);
 	            break;
 	        case PAYMENT_CASH:
-	            processCardPayment(scanner);
+	        	processCashPayment(scanner, totalValue);
 	            break;
 	    }
 	}
@@ -332,7 +329,7 @@ public class CashRegister {
 	private void processCardPayment(Scanner scanner) {
 		boolean isValid;
 	    do {
-	        String cardNumber = readString("Número do Cartão: ", scanner);
+	        String cardNumber = readString("\nNúmero do Cartão: ", scanner);
 	        String expiryDate = readString("Data de Validade (MM/YY): ", scanner);
 
 	        cardNumber = cardNumber.replaceAll("\\s+", "").trim();
@@ -350,10 +347,59 @@ public class CashRegister {
 	}
 
 	private void finalizePurchase(Usuario client, double totalValue) {
-	    System.out.println("\n=== FINALIZANDO A COMPRA ===");
-	    System.out.println("Email do cliente: " + client.getPessoa().getEmail());
-	    System.out.println("Total: R$ " + String.format("%.2f", totalValue));
-	    System.out.println("Compra finalizada com sucesso!");
+	    NotaFiscal notaFiscal = new NotaFiscal();
+	    notaFiscal.setCliente(client);
+	    notaFiscal.setData(Calendar.getInstance());
+
+	    for (Item item : cart) {
+	        Produto produto = item.getProduto();
+	        produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - item.getQuantidade());
+	        updateProduto(produto); 
+	    }
+	    
+	    notaFiscal.setItens(cart);
+	    persistNotaFiscal(notaFiscal);
+		
+	    System.out.println("\n\n\n=== NOTA FISCAL ===");
+	    System.out.println("Data: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(notaFiscal.getData().getTime()));
+	    System.out.println("Cliente: " + client.getPessoa().getEmail() + "\n");
+	    cart.stream()
+	    .map(item -> String.format("ID: %6d    %-20s Valor unitário: R$ %8.2f \t Quantidade: %d un.",
+	    						item.getProduto().getId(), Produto.formatarNome(item.getProduto().getNome()), 
+	                            item.getValorUnitario(), item.getQuantidade()))
+	    .forEach(System.out::println);
+	    System.out.println("\nTotal: R$ " + String.format("%.2f", totalValue));
+	    System.out.println("\u001B[32m\n\nCompra finalizada com sucesso!\u001B[0m");
+	}
+	
+	private void updateProduto(Produto produto) {
+	    try (Client client = ClientBuilder.newClient()) {
+	        Response response = client.target(BASE_URL + "produto/update")
+	                .request(MediaType.APPLICATION_JSON)
+	                .put(Entity.json(authJson(produto)));
+
+	        if (response.getStatus() == Response.Status.OK.getStatusCode() || 
+	            response.getStatus() == Response.Status.CREATED.getStatusCode()) {
+	        } else {
+	            System.err.println("Erro P: " + response.readEntity(String.class));
+	        }
+	        response.close();
+	    }
+	}
+	
+	private void persistNotaFiscal(NotaFiscal notaFiscal) {
+	    try (Client client = ClientBuilder.newClient()) {
+	        Response response = client.target(BASE_URL + "notafiscal/create")
+	                .request(MediaType.APPLICATION_JSON)
+	                .post(Entity.json(authJson(notaFiscal)));
+
+	        if (response.getStatus() == Response.Status.OK.getStatusCode() || 
+	            response.getStatus() == Response.Status.CREATED.getStatusCode()) {
+	        } else {
+	            System.err.println("Erro NF: " + response.readEntity(String.class));
+	        }
+	        response.close();
+	    }
 	}
 
 	
@@ -411,8 +457,8 @@ public class CashRegister {
             }
             return AUTH_SUCCESS;
         } else {
-            System.err.println("\nOcorreu um erro durante a autenticação! Verifique a API.");
-            return AUTH_ERROR;
+            System.err.println("\nCredenciais incorretas! Tente novamente.");
+            return AUTH_FAILURE;
         }
     }
 	
@@ -461,6 +507,10 @@ public class CashRegister {
     
     private String authJson(Usuario usuario) {
         return "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\",\"usuario\":" + usuario.toJson() + "}";
+    }
+    
+    private String authJson(NotaFiscal notaFiscal) {
+        return "{\"login\":\"" + cashier.getPessoa().getEmail() + "\",\"senha\":\"" + cashier.getSenha() + "\",\"notaFiscal\":" + notaFiscal.toJson() + "}";
     }
 
     private static String readString(String message, Scanner scanner) {

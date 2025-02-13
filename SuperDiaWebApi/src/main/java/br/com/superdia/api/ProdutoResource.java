@@ -45,6 +45,7 @@ public class ProdutoResource implements Serializable {
         	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	Produto produto = authRequest.getProduto();
+        	System.out.println(produto);
         	
             Produto createdProduto = produtoService.create(produto);
             return Response.status(Response.Status.CREATED).entity(createdProduto).build();
@@ -57,9 +58,11 @@ public class ProdutoResource implements Serializable {
     @Path("/update")
     public Response update(AuthRequest authRequest) {
         try {
-        	if(!getPerfil(authRequest.getLogin(), authRequest.getSenha()).equals(PERFIL_ADMIN))
+        	if(!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
         		return Response.status(Response.Status.FORBIDDEN).entity("Acesso Negado! Você não pode realizar essa operação").build();
         	Produto produto = authRequest.getProduto();
+        	
+        	System.out.println("\n\n\n\nPRODUTO ----------- " + produto + "\n\n\n");
         	
             produtoService.update(produto);
             return Response.ok(produto).build();

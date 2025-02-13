@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -23,10 +22,6 @@ public class Item implements Serializable {
     
     private Integer quantidade;
     private Double valorUnitario;
-    
-    @ManyToOne
-    @JoinColumn(name = "nota_fiscal_id")
-    private NotaFiscal notaFiscal;
 
     public Item() {}
 
@@ -68,14 +63,6 @@ public class Item implements Serializable {
 
 	public void setValorUnitario(Double valorUnitario) {
 		this.valorUnitario = valorUnitario;
-	}
-	
-    public NotaFiscal getNotaFiscal() {
-		return notaFiscal;
-	}
-
-	public void setNotaFiscal(NotaFiscal notaFiscal) {
-		this.notaFiscal = notaFiscal;
 	}
 
 	public String toJson() {
