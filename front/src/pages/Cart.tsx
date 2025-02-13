@@ -175,10 +175,7 @@ export default function Cart() {
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        onSuccess={() => {
-          setShowLoginModal(false);
-          handleCheckout();
-        }}
+        onSuccess={() => navigate('/checkout')}
       />
     </div>
   );

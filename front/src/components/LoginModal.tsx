@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import useAuth from '../context/useAuthContext';
 
 interface LoginModalProps {
@@ -11,18 +11,24 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
       await login(email, password);
       onSuccess();
+      onClose();
     } catch (error) {
       console.error('Login failed:', error);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -62,8 +68,14 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+            className="flex items-center justify-center w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+            disabled={loading}
           >
+            {
+              loading && (
+                <Loader2 className="animate-spin h-4 w-4 mr-2" />
+              )
+            }
             Entrar
           </button>
         </form>

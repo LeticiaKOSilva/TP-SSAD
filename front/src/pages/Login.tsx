@@ -1,17 +1,20 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../context/useAuthContext';
+import { Loader2 } from 'lucide-react';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       const user = await login(email, password);
@@ -30,7 +33,10 @@ export default function Register() {
         setError('Ocorreu um erro');
       }
     }
+
+    setLoading(false);
   };
+
   return (
     <div className="min-h-screen pt-24 pb-12 flex flex-col items-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -67,8 +73,13 @@ export default function Register() {
           </div>
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
+            {
+              loading && (
+                <Loader2 className="animate-spin h-4 w-4 mr-2" />
+              )
+            }
             Entrar
           </button>
         </form>

@@ -28,7 +28,7 @@ export default function CartProvider({ children }: { children: ReactNode }) {
     if (quantity < 1) return;
     setItems(currentItems =>
       currentItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+        item.id === productId ? { ...item, quantidade: quantity } : item
       )
     );
   };
@@ -37,9 +37,13 @@ export default function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
+  const setCart = (cartItems: CartItem[]) => {
+    setItems(cartItems);
+  };
+
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart }}
+      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, setCart }}
     >
       {children}
     </CartContext.Provider>

@@ -20,6 +20,7 @@ public class Produto implements Serializable {
     private int estoqueMinimo;
     private int quantidadeEstoque;
     private String urlImagem;
+    private String vendidoPor;
 
 	public Produto() {
     }
@@ -31,8 +32,18 @@ public class Produto implements Serializable {
         this.estoqueMinimo = estoqueMinimo;
         this.quantidadeEstoque = quantidadeEstoque;
     }
+    
+    public Produto(String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque, String vendidoPor, String urlImagem) {
+        this.nome = nome;
+        this.descricao = descricao;
+        this.preco = preco;
+        this.estoqueMinimo = estoqueMinimo;
+        this.quantidadeEstoque = quantidadeEstoque;
+        this.vendidoPor = vendidoPor;
+        this.urlImagem = urlImagem;
+    }
 
-    public Produto(Long id, String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque) {
+    public Produto(Long id, String nome, String descricao, double preco, int estoqueMinimo, int quantidadeEstoque, String vendidoPor, String urlImagem) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -94,13 +105,13 @@ public class Produto implements Serializable {
 		this.urlImagem = urlImagem;
 	}
 
-    public String toJson() {
-        String precoFormatted = String.format("%.2f", preco).replace(',', '.');
-        return String.format(
-            "{\"id\":%d,\"nome\":\"%s\",\"descricao\":\"%s\",\"preco\":%s,\"estoqueMinimo\":%d,\"quantidadeEstoque\":%d}",
-            id, nome, descricao, precoFormatted, estoqueMinimo, quantidadeEstoque
-        );
-    }
+	public String toJson() {
+	    String precoFormatted = String.format("%.2f", preco).replace(',', '.');
+	    return String.format(
+	        "{\"id\":%d,\"nome\":\"%s\",\"descricao\":\"%s\",\"preco\":%s,\"estoqueMinimo\":%d,\"quantidadeEstoque\":%d,\"vendidoPor\":\"%s\",\"urlImagem\":\"%s\"}",
+	        id, nome, descricao, precoFormatted, estoqueMinimo, quantidadeEstoque, vendidoPor, urlImagem
+	    );
+	}
 
 
     @Override
@@ -117,4 +128,12 @@ public class Produto implements Serializable {
         }
         return String.format("%-55s", nome);
     }
+
+	public String getVendidoPor() {
+		return vendidoPor;
+	}
+
+	public void setVendidoPor(String vendidoPor) {
+		this.vendidoPor = vendidoPor;
+	}
 }

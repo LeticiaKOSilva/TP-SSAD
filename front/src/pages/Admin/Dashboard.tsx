@@ -39,7 +39,7 @@ export default function Dashboard() {
   if (!user) return
 
   const getProducts = async () => {
-    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/produto/', {
+    const resp = await fetch('/api/produto/', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export default function Dashboard() {
   };  
 
   const createProduct = async (product: Product) => {
-    const resp = await fetch('http://localhost:8080/SuperDiaWebApi/rest/produto/create', {
+    const resp = await fetch('/api/produto/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export default function Dashboard() {
 
   const updateProduct = async (product: Product) => {
     const resp = await fetch(
-      `http://localhost:8080/SuperDiaWebApi/rest/produto/update`,
+      `/api/produto/update`,
       {
         method: 'PUT',
         headers: {
