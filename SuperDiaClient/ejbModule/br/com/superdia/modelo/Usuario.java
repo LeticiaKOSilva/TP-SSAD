@@ -57,4 +57,13 @@ public class Usuario implements Serializable{
 	public void setPerfil(String perfil) {
 		this.perfil = perfil;
 	}
+	
+	public String toJson() {
+	    return String.format(
+	        "{\"id\":%d,\"pessoa\":%s,\"perfil\":\"%s\"}",
+	        id,
+	        pessoa != null ? pessoa.toJson() : "null",
+	        perfil
+	    );
+	}
 }

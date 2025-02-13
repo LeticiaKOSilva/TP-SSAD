@@ -24,6 +24,11 @@ public class Pessoa implements Serializable{
 	private String telefone;
 	private Date dataNascimento;
 	
+	public Pessoa(String nome) {
+		super();
+		this.nome = nome;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -78,5 +83,18 @@ public class Pessoa implements Serializable{
 	
 	public void setDataNascimento(Date dataNascimento) {
 		this.dataNascimento = dataNascimento;
+	}
+	
+	public String toJson() {
+	    return String.format(
+	        "{\"id\":%d,\"nome\":\"%s\",\"endereco\":\"%s\",\"cpf\":\"%s\",\"email\":\"%s\",\"telefone\":\"%s\",\"dataNascimento\":\"%s\"}",
+	        id,
+	        nome,
+	        endereco,
+	        cpf,
+	        email,
+	        telefone,
+	        dataNascimento != null ? dataNascimento.toString() : "null"
+	    );
 	}
 }
