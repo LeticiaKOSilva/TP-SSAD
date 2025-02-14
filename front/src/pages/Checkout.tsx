@@ -3,14 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { CreditCard } from 'lucide-react';
 import useCart from '../context/useCartContext';
 import useAuth from '../context/useAuthContext';
+import InputMask from 'react-input-mask';
 
 interface CheckoutForm {
   name: string;
   email: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
   cardNumber: string;
   cardExpiry: string;
   cardCvc: string;
@@ -18,16 +15,12 @@ interface CheckoutForm {
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, clearCart } = useCart();
+  const { items, clearCart, turnCartIntoNotaFiscal } = useCart();
   const { user } = useAuth();
 
   const [formData, setFormData] = useState<CheckoutForm>({
     name: user?.pessoa.nome || '',
     email: user?.pessoa.email || '',
-    address: user?.pessoa.endereco || '',
-    city: '',
-    state: '',
-    zip: '',
     cardNumber: '',
     cardExpiry: '',
     cardCvc: '',
@@ -41,14 +34,12 @@ export default function Checkout() {
     setLoading(true);
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Clear cart and redirect to success page
+      await turnCartIntoNotaFiscal();
       clearCart();
       navigate('/checkout/success');
     } catch (error) {
-      console.error('Checkout failed:', error);
+      console.error(error);
+      alert('Erro ao criar nota fiscal');
     } finally {
       setLoading(false);
     }
@@ -94,61 +85,6 @@ export default function Checkout() {
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Endereço
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  required
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Cidade
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    required
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Estado
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    required
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  CEP
-                </label>
-                <input
-                  type="text"
-                  name="zip"
-                  required
-                  value={formData.zip}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                />
-              </div>
-
               <div className="pt-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Informações de Pagamento
@@ -159,14 +95,16 @@ export default function Checkout() {
                       Número do Cartão
                     </label>
                     <div className="mt-1 relative">
-                      <input
-                        type="text"
-                        name="cardNumber"
-                        required
-                        value={formData.cardNumber}
-                        onChange={handleInputChange}
-                        className="block w-full rounded-md border border-gray-300 px-3 py-2 pl-10"
-                      />
+                       <InputMask
+                          type="text"
+                          name="cardNumber"
+                          mask="9999 9999 9999 9999"
+                          value={formData.cardNumber}
+                          onChange={handleInputChange}
+                          maskChar={null}
+                          required
+                          className="block w-full rounded-md border border-gray-300 px-3 py-2 pl-10"
+                        />
                       <CreditCard className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                     </div>
                   </div>
@@ -175,13 +113,15 @@ export default function Checkout() {
                       <label className="block text-sm font-medium text-gray-700">
                         Validade
                       </label>
-                      <input
+                      <InputMask
                         type="text"
                         name="cardExpiry"
                         placeholder="MM/AA"
+                        mask="99/99"
                         required
                         value={formData.cardExpiry}
                         onChange={handleInputChange}
+                        maskChar={null}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                       />
                     </div>
@@ -189,12 +129,14 @@ export default function Checkout() {
                       <label className="block text-sm font-medium text-gray-700">
                         CVC
                       </label>
-                      <input
+                      <InputMask
                         type="text"
                         name="cardCvc"
+                        mask="999"
                         required
                         value={formData.cardCvc}
                         onChange={handleInputChange}
+                        maskChar={null}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                       />
                     </div>

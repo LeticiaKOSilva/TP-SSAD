@@ -3,6 +3,7 @@ package br.com.superdia.sessionbeans;
 import java.util.List;
 
 import br.com.superdia.interfaces.INotaFiscal;
+import br.com.superdia.modelo.Item;
 import br.com.superdia.modelo.NotaFiscal;
 import jakarta.ejb.Remote;
 import jakarta.ejb.Stateless;
@@ -18,6 +19,13 @@ public class NotaFiscalSB implements INotaFiscal {
 	
 	@Override
 	public void create(NotaFiscal notaFiscal) {
+		for (int i = 0; i < notaFiscal.getItens().size(); i++) {
+		    Item item = notaFiscal.getItens().get(i);
+		    if (item.getId() != null) {
+		        notaFiscal.getItens().set(i, em.merge(item));
+		    }
+		}
+		
 		em.persist(notaFiscal);
 	}
 

@@ -5,14 +5,19 @@ Frontend do Supermercado Dia
 ## Instalação
 
 1. Clone o repositório:
+
    ```bash
    git clone https://github.com/LeticiaKOSilva/TP-SSAD.git
    ```
+
 2. Navegue até o diretório "front" do projeto:
+
    ```bash
    cd TP-SSAD/front
    ```
+
 3. Instale as dependências:
+
    ```bash
    npm install
    ```
@@ -20,6 +25,7 @@ Frontend do Supermercado Dia
 ## Uso
 
 Para iniciar o projeto, execute:
+
 ```bash
 npm run dev
 ```
@@ -39,7 +45,9 @@ Depois, rode o comando, de acordo com seu dispositivo, para que o aplicativo sej
 ```bash
 npx cap add android
 ```
+
 ou
+
 ```bash
 npx cap add ios
 ```

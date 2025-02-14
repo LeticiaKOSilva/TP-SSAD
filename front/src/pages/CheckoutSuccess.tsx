@@ -10,7 +10,7 @@ export default function CheckoutSuccess() {
           Pedido Confirmado!
         </h2>
         <p className="mt-2 text-lg text-gray-600">
-          Obrigado por sua compra. Você receberá um email com os detalhes do pedido.
+          Obrigado por sua compra. Volte sempre!
         </p>
         <div className="mt-8">
           <Link

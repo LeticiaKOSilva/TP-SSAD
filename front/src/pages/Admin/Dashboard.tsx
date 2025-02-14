@@ -80,7 +80,7 @@ export default function Dashboard() {
   
         setShowAddProduct(false);
         setNewProduct({});
-        setEditingProductId(null); // Reset editing ID after successful update/creation
+        setEditingProductId(null);
       } catch (error) {
         console.error(error);
         alert('Erro ao criar/atualizar produto');

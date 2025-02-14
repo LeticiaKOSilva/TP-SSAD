@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import useCart from '../context/useCartContext';
 import { Product } from '../types';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, CheckCircle } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -8,6 +9,16 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
+  const [added, setAdded] = useState(false);
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    setAdded(true);
+
+    setTimeout(() => {
+      setAdded(false);
+    }, 1000);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
@@ -26,11 +37,25 @@ export default function ProductCard({ product }: ProductCardProps) {
             R$ {product.preco.toFixed(2)}
           </span>
           <button
-            onClick={() => addToCart(product)}
-            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            onClick={handleAddToCart}
+            className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
+              added
+                ? 'bg-green-600 text-white cursor-default'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+            }`}
+            disabled={added}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Adicionar
+            {added ? (
+              <>
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Adicionado!
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Adicionar
+              </>
+            )}
           </button>
         </div>
       </div>

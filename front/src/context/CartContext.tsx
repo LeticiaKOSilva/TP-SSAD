@@ -24,7 +24,6 @@ export default function CartProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    console.log(123)
     if (user?.perfil === 'cliente') {
       fetchCarrinho();
     }
@@ -38,7 +37,6 @@ export default function CartProvider({ children }: { children: ReactNode }) {
   }, [id, items]);
 
   const fetchCarrinho = async () => {
-    console.log({user})
     if (!user) return;
 
     try {
@@ -55,7 +53,6 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       }
 
       const carrinho = await resp.json();
-      console.log({carrinho})
 
       if (!carrinho && id) {
         await updateCart({ id, cliente: user, itens: items });
@@ -95,7 +92,7 @@ export default function CartProvider({ children }: { children: ReactNode }) {
 
       await updateItemQuantity(updatedItems[itemIndex].id, updatedItems[itemIndex].quantidade);
 
-      await updateCart({ id: currentId, cliente: user, itens: [updatedItems.map(item => { return { ...item, valorTotal: undefined } })] });
+      await updateCart({ id: currentId, cliente: user, itens: updatedItems.map(item => { return { ...item, valorTotal: undefined } }) });
 
       return setItems(updatedItems);
     }
@@ -137,11 +134,18 @@ export default function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const clearCart = () => {
+    setId('');
     setItems([]);
+    deleteCart();
   };
 
   const setCart = (cartItems: CartItem[]) => {
     setItems(cartItems);
+  };
+
+  const turnCartIntoNotaFiscal = async () => {
+    const newNotaFiscal = await createNotaFiscal({ cliente: user, itens: items.map(item => { return { ...item, valorTotal: undefined } }), data: new Date() });
+    return newNotaFiscal;
   };
 
   const createItem = async (itemData) => {
@@ -169,6 +173,20 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       }),
     });
     if (!resp.ok) throw new Error('Erro ao criar item');
+    return await resp.json();
+  };
+
+  const createNotaFiscal = async (cartData) => {
+    const resp = await fetch('/api/notafiscal/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        login: user?.pessoa.email,
+        senha: user?.senha,
+        notaFiscal: cartData,
+      }),
+    });
+    if (!resp.ok) throw new Error('Erro ao criar nota fiscal');
     return await resp.json();
   };
 
@@ -215,21 +233,22 @@ export default function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteCart = async () => {
-    const resp = await fetch(`/api/carrinho/delete/${user?.id}`, {
+    const resp = await fetch(`/api/carrinho/delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         login: user?.pessoa.email,
         senha: user?.senha,
+        carrinho: { id },
       }),
     });
     if (!resp.ok) throw new Error('Erro ao limpar carrinho');
-    return await resp.json();
+    return await resp.text();
   };
 
   return (
     <CartContext.Provider
-      value={{ items, fetchCarrinho, addToCart, removeFromCart, updateQuantity, clearCart, setCart }}
+      value={{ items, fetchCarrinho, addToCart, removeFromCart, updateQuantity, clearCart, setCart, turnCartIntoNotaFiscal }}
     >
       {children}
     </CartContext.Provider>
