@@ -2,7 +2,10 @@
 ### Trabalho desenvolvido em grupo para a matéria de  serviços de suporte a aplicações distribuídas
 
  ## Sobre o jogo
-<p><b>SuperDia</b> </p>
+ 
+<p><b>SuperDia</b>é um sistema desenvolvido para automatizar os processos do centro de distribuição (CD) do Supermercado Dia. O objetivo é gerenciar estoque, vendas e compras de maneira eficiente, integrando-se com unidades físicas, site e aplicativo móvel.
+</p>
+<p>Toda a lógica de negócio está implementada em EJB (Enterprise Java Beans) e disponibilizada por um servidor de aplicação. As camadas de interação com o usuário são responsáveis apenas pelo consumo da lógica de negócio, garantindo separação de responsabilidades. </p>
   
 ## O que é necessário?
   - Para montar esse projeto é necessário que se tenha algumas coisas:
@@ -32,14 +35,11 @@
    || Aplicação Mobile | Responsável por permitir aos usuários de perfil Cliente adicionem produtos no seu carrinho de compras e finalizam a compra. ||
    
 
-## Imagens referentes ao projeto
+## Vídeo de apresentação
 
-### -> Imagens parte Web
+<p> A seguir temos um vídeo de apresentação das interfaces do projeto, tanto desktop quanto a web</p>
 
-### -> Imagens parte Mobile
-
-### -> Imagens parte Desktop
-
+https://github.com/user-attachments/assets/1c84ac4f-5256-45ff-a60f-c31f249c76ac
 
 ## Colaboradores do Projeto
 
