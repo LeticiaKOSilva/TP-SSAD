@@ -1,7 +1,8 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 import useCart from '../context/useCartContext';
+import useAuth from '../context/useAuthContext';
 
 interface CheckoutForm {
   name: string;
@@ -18,10 +19,12 @@ interface CheckoutForm {
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, clearCart } = useCart();
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState<CheckoutForm>({
-    name: '',
-    email: '',
-    address: '',
+    name: user?.pessoa.nome || '',
+    email: user?.pessoa.email || '',
+    address: user?.pessoa.endereco || '',
     city: '',
     state: '',
     zip: '',
@@ -31,9 +34,7 @@ export default function Checkout() {
   });
   const [loading, setLoading] = useState(false);
 
-  const total = items.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
-  const shipping = 15.0;
-  const finalTotal = total + shipping;
+  const total = items.reduce((sum, item) => sum + item.produto.preco * item.quantidade, 0);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -221,13 +222,13 @@ export default function Checkout() {
                   <div key={item.id} className="flex justify-between">
                     <div className="flex items-center">
                       <img
-                        src={item.urlImagem}
-                        alt={item.nome}
+                        src={item.produto.urlImagem}
+                        alt={item.produto.nome}
                         className="h-16 w-16 object-cover rounded"
                       />
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-900">
-                          {item.nome}
+                          {item.produto.nome}
                         </p>
                         <p className="text-sm text-gray-500">
                           Quantidade: {item.quantidade}
@@ -235,33 +236,16 @@ export default function Checkout() {
                       </div>
                     </div>
                     <p className="text-sm font-medium text-gray-900">
-                      R$ {(item.preco * item.quantidade).toFixed(2)}
+                      R$ {(item.produto.preco * item.quantidade).toFixed(2)}
                     </p>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 border-t border-gray-200 pt-6">
-                <div className="flex justify-between">
-                  <p className="text-sm text-gray-600">Subtotal</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    R$ {total.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between mt-2">
-                  <div className="flex items-center">
-                    <Truck className="h-5 w-5 text-gray-400 mr-2" />
-                    <p className="text-sm text-gray-600">Frete</p>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">
-                    R$ {shipping.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between mt-6 border-t border-gray-200 pt-6">
-                  <p className="text-base font-medium text-gray-900">Total</p>
-                  <p className="text-base font-medium text-gray-900">
-                    R$ {finalTotal.toFixed(2)}
-                  </p>
-                </div>
+              <div className="flex justify-between mt-6 border-t border-gray-200 pt-6">
+                <p className="text-base font-medium text-gray-900">Total</p>
+                <p className="text-base font-medium text-gray-900">
+                  R$ {total.toFixed(2)}
+                </p>
               </div>
             </div>
           </div>

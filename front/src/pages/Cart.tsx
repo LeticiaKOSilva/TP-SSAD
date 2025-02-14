@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import LoginModal from '../components/LoginModal';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import useCart from '../context/useCartContext';
@@ -9,9 +9,10 @@ export default function Cart() {
   const { items, removeFromCart, updateQuantity } = useCart();
   const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const { fetchCarrinho } = useCart();
   const navigate = useNavigate();
 
-  const total = items.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
+  const total = items.reduce((sum, item) => sum + item.produto.preco * item.quantidade, 0);
 
   const handleCheckout = () => {
     if (!user) {
@@ -20,6 +21,12 @@ export default function Cart() {
       navigate('/checkout');
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchCarrinho();
+    }
+  }, [])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
@@ -35,17 +42,17 @@ export default function Cart() {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
                     <img
-                      src={item.urlImagem}
-                      alt={item.nome}
+                      src={item.produto.urlImagem}
+                      alt={item.produto.nome}
                       className="h-16 w-16 object-cover rounded"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">{item.nome}</div>
+                      <div className="font-medium text-gray-900">{item.produto.nome}</div>
                       <div className="text-sm text-gray-500 mt-1">
-                        R$ {item.preco.toFixed(2)} × {item.quantidade}
+                        R$ {item.produto.preco.toFixed(2)} × {item.quantidade}
                       </div>
                       <div className="text-sm font-medium text-gray-900 mt-1">
-                        R$ {(item.preco * item.quantidade).toFixed(2)}
+                        R$ {(item.produto.preco * item.quantidade).toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -103,20 +110,20 @@ export default function Cart() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img
-                          src={item.urlImagem}
-                          alt={item.nome}
+                          src={item.produto.urlImagem}
+                          alt={item.produto.nome}
                           className="h-16 w-16 object-cover rounded"
                         />
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {item.nome}
+                            {item.produto.nome}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        R$ {item.preco.toFixed(2)}
+                        R$ {item.produto.preco.toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -138,7 +145,7 @@ export default function Cart() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        R$ {(item.preco * item.quantidade).toFixed(2)}
+                        R$ {(item.produto.preco * item.quantidade).toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

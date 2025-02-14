@@ -10,8 +10,11 @@ export interface Product {
   urlImagem?: string;
 }
 
-export interface CartItem extends Product {
+export interface CartItem {
+  id: string;
+  produto: Product;
   quantidade: number;
+  valorUnitario: number;
 }
 
 export interface Person {
@@ -39,6 +42,7 @@ export interface AuthContextType {
 
 export interface CartContextType {
   items: CartItem[];
+  fetchCarrinho: () => void;
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;

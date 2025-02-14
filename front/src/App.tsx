@@ -40,8 +40,8 @@ function AdminRedirect() {
 
 function App() {
   return (
-    <CartProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <CartProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="min-h-screen bg-gray-100">
             <Header />
@@ -71,8 +71,8 @@ function App() {
             </Routes>
           </div>
         </Router>
-      </AuthProvider>
-    </CartProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

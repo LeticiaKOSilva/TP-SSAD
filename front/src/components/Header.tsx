@@ -8,12 +8,13 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { items } = useCart();
+  const { items, setCart } = useCart();
 
   const totalItems = items.reduce((sum, item) => sum + item.quantidade, 0);
 
   const handleLogout = () => {
     setIsDropdownOpen(false);
+    setCart([]);
     logout();
   };
 
@@ -68,7 +69,7 @@ export default function Header() {
                         </Link>
                       )}
                       <button
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Sair

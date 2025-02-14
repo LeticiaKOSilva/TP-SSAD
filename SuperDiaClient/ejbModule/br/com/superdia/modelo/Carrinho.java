@@ -6,10 +6,13 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
@@ -24,7 +27,8 @@ public class Carrinho implements Serializable {
     @ManyToOne
     private Usuario cliente;
     
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "carrinho_id")
     private List<Item> itens = new ArrayList<Item>();
     
     public Carrinho() {}
@@ -59,6 +63,10 @@ public class Carrinho implements Serializable {
 	public void setItens(List<Item> itens) {
 		this.itens = itens;
 	}
+	
+	public void removeItem(Item item) {
+        itens.removeIf(i -> i.getId().equals(item.getId()));
+    }
 
 	public String toJson() {
 	    return String.format(

@@ -52,7 +52,7 @@ public class CarrinhoResource implements Serializable {
     @PUT
     @Path("/update")
     public Response update(AuthRequest authRequest) {
-        try {            
+        try {
             Carrinho carrinho = authRequest.getCarrinho();
             Carrinho carrinhoBanco = carrinhoService.getCarrinhoById(carrinho.getId());
             
@@ -76,7 +76,7 @@ public class CarrinhoResource implements Serializable {
             
             Carrinho carrinho = authRequest.getCarrinho();
             carrinhoService.delete(carrinho);
-            return Response.ok().entity("Carrinho removida com sucesso!").build();
+            return Response.ok().entity("Carrinho removido com sucesso!").build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Erro ao remover carrinho").build();
         }
@@ -101,7 +101,7 @@ public class CarrinhoResource implements Serializable {
     }
     
     @POST
-    @Path("/{usuarioId}")
+    @Path("/delete/{usuarioId}")
     public Response deleteCarrinhoByUsuario(@PathParam("usuarioId") Long usuarioId, AuthRequest authRequest) {
         try {
             if (!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))

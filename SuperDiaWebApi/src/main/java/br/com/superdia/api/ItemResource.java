@@ -68,10 +68,7 @@ public class ItemResource implements Serializable {
     @POST
     @Path("/delete")
     public Response delete(AuthRequest authRequest) {
-        try {
-            if (!isAuthenticated(authRequest.getLogin(), authRequest.getSenha()))
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Acesso Negado! Autenticação necessária").build();
-            
+        try {            
             Item item = authRequest.getItem();
             itemService.delete(item);
             return Response.ok().entity("Item removido com sucesso!").build();
