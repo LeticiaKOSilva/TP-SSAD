@@ -7,6 +7,7 @@
 		<class>br.com.superdia.modelo.Usuario</class>
 		<class>br.com.superdia.modelo.Item</class>
 		<class>br.com.superdia.modelo.NotaFiscal</class>
+		<class>br.com.superdia.modelo.Carrinho</class>
 		<properties>
 			<property name="jakarta.persistence.schema-generation.database.action" value="update"/>
 		</properties>
